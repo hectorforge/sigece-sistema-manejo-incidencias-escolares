@@ -1,8 +1,8 @@
 package pe.gob.minedu.sigece.enums;
 
 /**
- * Ciclo de vida (workflow) del caso de convivencia escolar,
- * modelado conforme al proceso BPMN de atención de incidencias.
+ * Estados del expediente, alineados a las fases del D.S. N.° 004-2018-MINEDU:
+ * Registro -> Investigación -> Seguimiento -> Resolución / Derivación -> Cierre.
  */
 public enum EstadoIncidente {
     REGISTRADO,

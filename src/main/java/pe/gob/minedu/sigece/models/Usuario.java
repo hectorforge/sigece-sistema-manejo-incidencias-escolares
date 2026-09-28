@@ -1,179 +1,78 @@
 package pe.gob.minedu.sigece.models;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Objects;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-/**
- * Usuario del sistema: personal directivo, tutor o integrante
- * del Comité de Gestión del Bienestar con acceso a SIGECE.
- */
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = "usuarios")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "nombres", nullable = false, length = 100)
     private String nombres;
 
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "apellidos", nullable = false, length = 100)
     private String apellidos;
 
-    @Column(name = "dni", unique = true, length = 15)
+    @NotBlank
+    @Pattern(regexp = "^[0-9]{8,15}$")
+    @Column(name = "dni", nullable = false, unique = true, length = 15)
     private String dni;
 
+    @NotBlank
+    @Email
+    @Size(max = 150)
     @Column(name = "correo", nullable = false, unique = true, length = 150)
     private String correo;
 
+    @NotBlank
+    @Size(max = 50)
     @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
 
+    @NotBlank
+    @Size(max = 255)
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
+    @Size(max = 20)
     @Column(name = "telefono", length = 20)
     private String telefono;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "role_id", nullable = false, foreignKey = @ForeignKey(name = "fk_usuarios_role"))
-    private Role role;
+    @JoinColumn(name = "role_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_usuarios_roles"))
+    private Rol rol;
 
+    @NotNull
     @Column(name = "activo", nullable = false)
-    private boolean activo = true;
+    private Boolean activo = true;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    protected Usuario() {
-
-    }
-
-    public Usuario(String nombres, String apellidos, String correo,
-                    String username, String passwordHash, Role role) {
-            this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.correo = correo;
-        this.username = username;
-        this.passwordHash = passwordHash;
-        this.role = role;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getNombres() {
-        return nombres;
-    }
-
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
-    }
-
-    public String getApellidos() {
-        return apellidos;
-    }
-
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
-    }
-
-    public String getDni() {
-        return dni;
-    }
-
-    public void setDni(String dni) {
-        this.dni = dni;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Usuario)) return false;
-        Usuario usuario = (Usuario) o;
-        return id != null && id.equals(usuario.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Usuario{id=" + id + ", username='" + username + "', correo='" + correo + "'}";
-    }
+    private OffsetDateTime updatedAt;
 }

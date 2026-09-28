@@ -1,109 +1,74 @@
 package pe.gob.minedu.sigece.models;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import pe.gob.minedu.sigece.domain.enums.RolInvolucrado;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import pe.gob.minedu.sigece.enums.RolInvolucrado;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.OffsetDateTime;
 
 /**
- * Relación N:M entre {@link Incidente} y {@link Estudiante}, indicando
- * el rol del estudiante en el caso (víctima, agresor o testigo).
- * Esta tabla es la base para el análisis de patrones de reincidencia
- * exigido por el personal directivo y de tutoría.
+ * Mapea a víctimas, agresores y testigos. La regla de exclusión
+ * (estudiante XOR usuario) definida en la BD se refuerza aquí
+ * con una validación a nivel de objeto (@AssertTrue) y también
+ * debe validarse en la capa de servicio antes de persistir.
  */
 @Entity
-@Table(
-    name = "incidente_involucrados",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"incidente_id", "estudiante_id", "rol_involucrado"})
-)
+@Table(name = "incidente_involucrados",
+        indexes = {
+                @Index(name = "idx_involucrados_incidente", columnList = "incidente_id")
+        })
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class IncidenteInvolucrado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "incidente_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_involucrados_incidente"))
-    @JdbcTypeCode(SqlTypes.UUID)
     private Incidente incidente;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "estudiante_id", nullable = false,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "estudiante_id",
             foreignKey = @ForeignKey(name = "fk_involucrados_estudiante"))
     private Estudiante estudiante;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id",
+            foreignKey = @ForeignKey(name = "fk_involucrados_usuario"))
+    private Usuario usuario;
+
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "rol_involucrado", nullable = false, length = 20)
     private RolInvolucrado rolInvolucrado;
 
+    @Size(max = 255)
     @Column(name = "observaciones", length = 255)
     private String observaciones;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
-    protected IncidenteInvolucrado() {
-        // Requerido por JPA
-    }
-
-    public IncidenteInvolucrado(Incidente incidente, Estudiante estudiante, RolInvolucrado rolInvolucrado) {
-        this.incidente = incidente;
-        this.estudiante = estudiante;
-        this.rolInvolucrado = rolInvolucrado;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Incidente getIncidente() {
-        return incidente;
-    }
-
-    public Estudiante getEstudiante() {
-        return estudiante;
-    }
-
-    public RolInvolucrado getRolInvolucrado() {
-        return rolInvolucrado;
-    }
-
-    public void setRolInvolucrado(RolInvolucrado rolInvolucrado) {
-        this.rolInvolucrado = rolInvolucrado;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof IncidenteInvolucrado)) return false;
-        IncidenteInvolucrado that = (IncidenteInvolucrado) o;
-        return id != null && id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
+    /**
+     * Espeja la CHECK constraint chk_involucrado_entidad_exclusiva:
+     * debe existir un estudiante O un usuario, nunca ambos ni ninguno.
+     */
+    @AssertTrue(message = "El involucrado debe ser exactamente un estudiante o un usuario (personal), no ambos ni ninguno.")
+    public boolean isEntidadExclusivaValida() {
+        return (estudiante != null && usuario == null) || (estudiante == null && usuario != null);
     }
 }

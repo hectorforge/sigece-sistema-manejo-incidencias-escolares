@@ -2,41 +2,42 @@ package pe.gob.minedu.sigece.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pe.gob.minedu.sigece.enums.CategoriaSiseve;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "tipos_incidencia")
+@Table(name = "roles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TipoIncidencia {
+public class Rol {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Size(max = 100)
-    @Column(name = "nombre", nullable = false, unique = true, length = 100)
+    @Size(min = 3, max = 50)
+    @Column(name = "nombre", nullable = false, unique = true, length = 50)
     private String nombre;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "categoria_siseve", nullable = false, length = 50)
-    private CategoriaSiseve categoriaSiseve;
 
     @Size(max = 255)
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 
-    @NotNull
-    @Column(name = "activo", nullable = false)
-    private Boolean activo = true;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private OffsetDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
 }

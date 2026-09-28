@@ -1,0 +1,11 @@
+package pe.gob.minedu.sigece.enums;
+
+public enum TipoAccion {
+    ENTREVISTA_ESTUDIANTE,
+    ENTREVISTA_PADRES,
+    DERIVACION_PSICOLOGIA,
+    MEDIDA_CORRECTIVA_FORMATIVA,
+    DERIVACION_DEMUNA_CEM,
+    ACTA_COMPROMISO,
+    OTRO
+}
