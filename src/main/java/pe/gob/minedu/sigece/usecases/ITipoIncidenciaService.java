@@ -10,7 +10,7 @@ import java.util.List;
  * alineado a las categorías oficiales de SíSeVe, garantizando una
  * clasificación estandarizada y sin ambigüedad técnica o legal.
  */
-public interface TipoIncidenciaService {
+public interface ITipoIncidenciaService {
 
     TipoIncidenciaDTO crear(TipoIncidenciaDTO dto);
 

@@ -11,7 +11,7 @@ import java.util.UUID;
  * actas firmadas escaneadas, fotografías) sobre Azure Blob Storage,
  * resolviendo la pérdida probatoria propia del expediente físico.
  */
-public interface IncidenteAdjuntoService {
+public interface IIncidenteAdjuntoService {
 
     /**
      * Sube un archivo de evidencia al contenedor Azure Blob Storage,

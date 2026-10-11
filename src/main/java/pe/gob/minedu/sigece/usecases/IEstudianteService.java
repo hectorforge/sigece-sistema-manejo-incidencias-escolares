@@ -1,7 +1,8 @@
 package pe.gob.minedu.sigece.usecases;
 
-import pe.edu.cibertec.sigece.domain.enums.Nivel;
-import pe.edu.cibertec.sigece.service.dto.EstudianteDTO;
+import pe.gob.minedu.sigece.dtos.estudiantes.EstudianteRequestDto;
+import pe.gob.minedu.sigece.dtos.estudiantes.EstudianteResponseDto;
+
 
 import java.util.List;
 
@@ -10,17 +11,17 @@ import java.util.List;
  * (datos personales de menores de edad), como sujeto central de
  * protección dentro del sistema.
  */
-public interface EstudianteService {
+public interface IEstudianteService {
 
-    EstudianteDTO registrarEstudiante(EstudianteDTO dto);
+    EstudianteResponseDto registrarEstudiante(EstudianteRequestDto dto);
 
-    EstudianteDTO actualizarDatos(Long estudianteId, EstudianteDTO dto);
+    EstudianteResponseDto actualizarDatos(Long estudianteId, EstudianteRequestDto dto);
 
-    EstudianteDTO obtenerPorId(Long estudianteId);
+    EstudianteResponseDto obtenerPorId(Long estudianteId);
 
-    EstudianteDTO obtenerPorCodigoSiagie(String codigoSiagie);
+    EstudianteResponseDto obtenerPorCodigoSiagie(String codigoSiagie);
 
-    List<EstudianteDTO> listarPorGradoYSeccion(String grado, String seccion, Nivel nivel);
+    List<EstudianteResponseDto> listarPorGradoYSeccion(String grado, String seccion, pe.gob.minedu.sigece.enums.Nivel nivel);
 
     /**
      * Desactiva (soft-delete) a un estudiante egresado o retirado,

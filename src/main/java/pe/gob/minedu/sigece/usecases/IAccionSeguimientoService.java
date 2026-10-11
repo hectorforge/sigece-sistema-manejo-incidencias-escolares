@@ -9,7 +9,7 @@ import java.util.UUID;
  * derivaciones psicológicas. Evita la ruptura entre el registro
  * inicial del caso y su efectivo cierre o resolución.
  */
-public interface AccionSeguimientoService {
+public interface IAccionSeguimientoService {
 
     /**
      * Registra una nueva acción de seguimiento (entrevista, derivación

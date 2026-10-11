@@ -12,7 +12,7 @@ import java.util.UUID;
  * para los casos que superan el ámbito de atención interna de la IE
  * (gravedad GRAVE/MUY_GRAVE, violencia sexual, reincidencia crítica, etc.).
  */
-public interface SiseveDerivacionService {
+public interface ISiseveDerivacionService {
 
     /**
      * Evalúa si un incidente cumple los criterios normativos de derivación

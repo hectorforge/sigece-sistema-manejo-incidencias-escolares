@@ -14,7 +14,7 @@ import java.util.UUID;
  * llamada o citación presencial) generando constancia legal exigible
  * ante una eventual fiscalización de UGEL/SíSeVe.
  */
-public interface NotificacionService {
+public interface INotificacionService {
 
     /**
      * Genera y envía una notificación a él/los apoderado(s) del(los)

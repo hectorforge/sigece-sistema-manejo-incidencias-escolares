@@ -10,7 +10,7 @@ import java.util.List;
  * miembros del Comité de Gestión del Bienestar y directivos) con
  * acceso al sistema, bajo el modelo de control de acceso RBAC.
  */
-public interface UsuarioService {
+public interface IUsuarioService {
 
     UsuarioDTO registrarUsuario(UsuarioDTO dto, String passwordPlano);
 

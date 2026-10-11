@@ -1,6 +1,7 @@
 package pe.gob.minedu.sigece.usecases;
 
-import pe.edu.cibertec.sigece.service.dto.ApoderadoDTO;
+import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoRequestDto;
+import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoResponseDto;
 
 import java.util.List;
 
@@ -8,21 +9,21 @@ import java.util.List;
  * Gestiona a los padres/tutores legales, receptores oficiales de las
  * notificaciones y responsables civiles del menor ante la IE.
  */
-public interface ApoderadoService {
+public interface IApoderadoService {
 
-    ApoderadoDTO registrarApoderado(ApoderadoDTO dto);
+    ApoderadoResponseDto registrarApoderado(ApoderadoRequestDto dto);
 
-    ApoderadoDTO actualizarDatosContacto(Long apoderadoId, ApoderadoDTO dto);
+    ApoderadoResponseDto actualizarDatosContacto(Long apoderadoId, ApoderadoRequestDto dto);
 
-    ApoderadoDTO obtenerPorId(Long apoderadoId);
+    ApoderadoResponseDto obtenerPorId(Long apoderadoId);
 
-    ApoderadoDTO obtenerPorNumeroDocumento(String numeroDocumento);
+    ApoderadoResponseDto obtenerPorNumeroDocumento(String numeroDocumento);
 
     /**
      * Recupera al/los apoderado(s) de un estudiante, priorizando el
      * marcado como es_contacto_principal para el envío de notificaciones.
      */
-    List<ApoderadoDTO> listarPorEstudiante(Long estudianteId);
+    List<ApoderadoResponseDto> listarPorEstudiante(Long estudianteId);
 
     /**
      * Define/reasigna cuál apoderado es el contacto principal de

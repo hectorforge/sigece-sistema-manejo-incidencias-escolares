@@ -11,7 +11,7 @@ import java.util.UUID;
  * de cada expediente, soportando tanto violencia entre pares (alumno-alumno)
  * como de personal hacia alumno.
  */
-public interface IncidenteInvolucradoService {
+public interface IIncidenteInvolucradoService {
 
     /**
      * Vincula a un estudiante o a un miembro del personal como parte

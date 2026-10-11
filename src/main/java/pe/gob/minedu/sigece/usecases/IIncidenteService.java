@@ -16,7 +16,7 @@ import java.util.UUID;
  * Reemplaza el cuaderno físico de incidencias, centralizando el registro
  * y garantizando trazabilidad de cada expediente.
  */
-public interface IncidenteService {
+public interface IIncidenteService {
 
     /**
      * Registra un nuevo incidente (Fase de Registro). Genera automáticamente
