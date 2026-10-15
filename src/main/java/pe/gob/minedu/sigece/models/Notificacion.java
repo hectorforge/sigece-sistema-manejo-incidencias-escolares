@@ -1,6 +1,7 @@
 package pe.gob.minedu.sigece.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -45,10 +46,19 @@ public class Notificacion {
             foreignKey = @ForeignKey(name = "fk_notif_enviado_por"))
     private Usuario enviadoPor;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "alerta_id",
+            foreignKey = @ForeignKey(name = "fk_notif_alerta"))
+    private Alerta alerta;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "canal", nullable = false, length = 20)
     private CanalNotificacion canal;
+
+    @Size(max = 150)
+    @Column(name = "destino", length = 150)
+    private String destino;
 
     @NotBlank
     @Size(max = 150)
@@ -66,6 +76,15 @@ public class Notificacion {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_envio", nullable = false, length = 20)
     private EstadoEnvio estadoEnvio = EstadoEnvio.PENDIENTE;
+
+    @NotNull
+    @Min(0)
+    @Column(name = "intentos_envio", nullable = false)
+    private Integer intentosEnvio = 0;
+
+    @Size(max = 500)
+    @Column(name = "detalle_resultado", length = 500)
+    private String detalleResultado;
 
     @Size(max = 150)
     @Column(name = "id_transaccion_externo", length = 150)

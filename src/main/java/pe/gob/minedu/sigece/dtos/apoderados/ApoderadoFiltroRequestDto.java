@@ -1,4 +1,11 @@
 package pe.gob.minedu.sigece.dtos.apoderados;
 
-public record ApoderadoFiltroRequestDto() {
+import pe.gob.minedu.sigece.enums.TipoDocumento;
+
+public record ApoderadoFiltroRequestDto(
+        String termino,
+        TipoDocumento tipoDocumento,
+        Integer page,
+        Integer size
+) {
 }

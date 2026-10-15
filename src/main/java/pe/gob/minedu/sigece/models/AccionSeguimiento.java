@@ -48,9 +48,9 @@ public class AccionSeguimiento {
     @Column(name = "descripcion", nullable = false, columnDefinition = "TEXT")
     private String descripcion;
 
-    @CreationTimestamp
-    @Column(name = "fecha_accion", nullable = false, updatable = false)
-    private OffsetDateTime fechaAccion;
+    @NotNull
+    @Column(name = "fecha_accion", nullable = false)
+    private OffsetDateTime fechaAccion = OffsetDateTime.now();
 
     @Column(name = "fecha_proxima_revision")
     private LocalDate fechaProximaRevision;
@@ -59,6 +59,9 @@ public class AccionSeguimiento {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_accion", nullable = false, length = 20)
     private EstadoAccion estadoAccion = EstadoAccion.PENDIENTE;
+
+    @Column(name = "fecha_completada")
+    private OffsetDateTime fechaCompletada;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

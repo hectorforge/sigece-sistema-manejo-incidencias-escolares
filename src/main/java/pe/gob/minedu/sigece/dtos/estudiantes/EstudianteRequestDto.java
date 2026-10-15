@@ -22,7 +22,7 @@ public record EstudianteRequestDto(
         String apellidos,
 
         @NotNull(message = "La fecha de nacimiento es obligatoria")
-        @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
+        @Past(message = "La fecha de nacimiento debe ser anterior a la fecha actual")
         LocalDate fechaNacimiento,
 
         @NotNull(message = "El nivel educativo es obligatorio")

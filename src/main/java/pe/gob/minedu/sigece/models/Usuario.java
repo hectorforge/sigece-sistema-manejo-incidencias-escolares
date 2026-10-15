@@ -68,6 +68,25 @@ public class Usuario {
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
+    @Column(name = "ultimo_acceso")
+    private OffsetDateTime ultimoAcceso;
+
+    @NotNull
+    @Min(0)
+    @Column(name = "intentos_fallidos", nullable = false)
+    private Integer intentosFallidos = 0;
+
+    @Column(name = "bloqueado_hasta")
+    private OffsetDateTime bloqueadoHasta;
+
+    @NotNull
+    @Column(name = "password_actualizado_at", nullable = false)
+    private OffsetDateTime passwordActualizadoAt = OffsetDateTime.now();
+
+    @NotNull
+    @Column(name = "debe_cambiar_password", nullable = false)
+    private Boolean debeCambiarPassword = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

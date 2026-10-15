@@ -1,4 +1,11 @@
 package pe.gob.minedu.sigece.dtos.reportes;
 
-public record TipoReporteResponseDto() {
+import java.util.List;
+
+public record TipoReporteResponseDto(
+        String codigo,
+        String nombre,
+        String descripcion,
+        List<String> formatosSoportados
+) {
 }

@@ -1,4 +1,13 @@
 package pe.gob.minedu.sigece.dtos.incidentes;
 
-public record ReincidenciaRequestDto() {
+import jakarta.validation.constraints.NotNull;
+
+import java.time.OffsetDateTime;
+
+public record ReincidenciaRequestDto(
+        @NotNull(message = "El ID del estudiante es obligatorio")
+        Long estudianteId,
+
+        OffsetDateTime fechaReferencia
+) {
 }

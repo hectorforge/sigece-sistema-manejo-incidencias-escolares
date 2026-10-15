@@ -1,7 +1,6 @@
 package pe.gob.minedu.sigece.dtos.apoderados;
 
 import pe.gob.minedu.sigece.enums.TipoDocumento;
-import pe.gob.minedu.sigece.models.Apoderado;
 
 import java.time.OffsetDateTime;
 
@@ -13,6 +12,6 @@ public record ApoderadoResponseDto(
         String numeroDocumento,
         String telefono,
         String correo,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
-) { }
+        OffsetDateTime createdAt
+) {
+}

@@ -3,6 +3,7 @@ package pe.gob.minedu.sigece.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,17 +11,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import pe.gob.minedu.sigece.enums.EstadoDerivacion;
 import pe.gob.minedu.sigece.enums.EstadoIncidente;
 import pe.gob.minedu.sigece.enums.Gravedad;
+import pe.gob.minedu.sigece.enums.ModoDerivacion;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Expediente digital central del caso de convivencia escolar.
- * PK de tipo UUID para evitar exponer numeración secuencial sensible
- * en URLs o reportes ante terceros (UGEL, SíSeVe).
- */
 @Entity
 @Table(name = "incidentes")
 @Getter
@@ -87,9 +85,29 @@ public class Incidente {
     @Column(name = "reincidencia", nullable = false)
     private Boolean reincidencia = false;
 
+    @Column(name = "acta_cierre", columnDefinition = "TEXT")
+    private String actaCierre;
+
+    @Column(name = "fecha_cierre")
+    private OffsetDateTime fechaCierre;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cerrado_por_id",
+            foreignKey = @ForeignKey(name = "fk_incidentes_cerrado_por"))
+    private Usuario cerradoPor;
+
     @NotNull
     @Column(name = "reportado_siseve", nullable = false)
     private Boolean reportadoSiseve = false;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_derivacion", nullable = false, length = 20)
+    private EstadoDerivacion estadoDerivacion = EstadoDerivacion.NO_DERIVADA;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "modo_derivacion", length = 20)
+    private ModoDerivacion modoDerivacion;
 
     @Column(name = "fecha_reporte_siseve")
     private OffsetDateTime fechaReporteSiseve;
@@ -97,6 +115,18 @@ public class Incidente {
     @Size(max = 50)
     @Column(name = "codigo_siseve", length = 50)
     private String codigoSiseve;
+
+    @Column(name = "observaciones_siseve", columnDefinition = "TEXT")
+    private String observacionesSiseve;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "derivado_por_id",
+            foreignKey = @ForeignKey(name = "fk_incidentes_derivado_por"))
+    private Usuario derivadoPor;
+
+    @Size(max = 500)
+    @Column(name = "error_integracion_siseve", length = 500)
+    private String errorIntegracionSiseve;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

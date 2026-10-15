@@ -1,4 +1,11 @@
 package pe.gob.minedu.sigece.dtos.adjuntos;
 
-public record AdjuntoUrlResponseDto() {
+import java.time.OffsetDateTime;
+
+public record AdjuntoUrlResponseDto(
+        Long adjuntoId,
+        String nombreOriginal,
+        String urlDescargaTemporal,
+        OffsetDateTime expiraEn
+) {
 }
