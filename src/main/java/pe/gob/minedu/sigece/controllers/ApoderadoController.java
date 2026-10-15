@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 import pe.gob.minedu.sigece.controllers.contracts.IApoderadoContractApi;
 import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoRequestDto;
 import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoResponseDto;
-import pe.gob.minedu.sigece.dtos.common.PagedResponse;
+import pe.gob.minedu.sigece.dtos.apoderados.VinculoFamiliarResponseDto;
+import pe.gob.minedu.sigece.dtos.common.ApiResponse;
 import pe.gob.minedu.sigece.usecases.IApoderadoService;
 
 import java.util.List;
@@ -20,37 +21,42 @@ public class ApoderadoController implements IApoderadoContractApi {
 
 
     @Override
-    public ResponseEntity<ApoderadoResponseDto> registrarApoderado(ApoderadoRequestDto dto) {
+    public ResponseEntity<ApiResponse<ApoderadoResponseDto>> registrarApoderado(ApoderadoRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseEntity<ApoderadoResponseDto> actualizarDatosContacto(Long apoderadoId, ApoderadoRequestDto dto) {
+    public ResponseEntity<ApiResponse<ApoderadoResponseDto>> actualizarDatosContacto(Long apoderadoId, ApoderadoRequestDto dto) {
         return null;
     }
 
     @Override
-    public ResponseEntity<ApoderadoResponseDto> obtenerPorId(Long apoderadoId) {
+    public ResponseEntity<ApiResponse<ApoderadoResponseDto>> obtenerPorId(Long apoderadoId) {
         return null;
     }
 
     @Override
-    public ResponseEntity<ApoderadoResponseDto> obtenerPorNumeroDocumento(String numeroDocumento) {
+    public ResponseEntity<ApiResponse<ApoderadoResponseDto>> obtenerPorNumeroDocumento(String numeroDocumento) {
         return null;
     }
 
     @Override
-    public ResponseEntity<List<ApoderadoResponseDto>> listarPorEstudiante(Long estudianteId) {
+    public ResponseEntity<ApiResponse<List<ApoderadoResponseDto>>> listarPorEstudiante(Long estudianteId) {
         return null;
     }
 
     @Override
-    public ResponseEntity<PagedResponse<ApoderadoResponseDto>> buscar(String apellido, String nombre, String numeroDocumento) {
+    public ResponseEntity<ApiResponse<List<VinculoFamiliarResponseDto>>> listarVinculosPorApoderado(Long apoderadoId) {
         return null;
     }
 
     @Override
-    public ResponseEntity<Void> marcarContactoPrincipal(Long estudianteId, Long apoderadoId) {
+    public ResponseEntity<ApiResponse<List<ApoderadoResponseDto>>> buscar(String apellido, String nombre, String numeroDocumento, int page, int size) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Void>> marcarContactoPrincipal(Long estudianteId, Long apoderadoId) {
         return null;
     }
 }
