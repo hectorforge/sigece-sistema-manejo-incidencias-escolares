@@ -20,47 +20,65 @@ public record ApiResponse<T>(
         OffsetDateTime timestamp
 ) {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record ApiError(
-            String code,
+    public static <T> ApiResponse<T> success(
+            T data,
             String message,
-            String suggestion,
-            Map<String, String> details
+            HttpStatus status,
+            String path,
+            String traceId
     ) {
-        public static ApiError fromCatalog(ErrorCatalog catalog) {
-            return new ApiError(catalog.getCode(), catalog.getMessage(), catalog.getSuggestion(), null);
-        }
-
-        public static ApiError fromCatalog(ErrorCatalog catalog, String customMessage) {
-            return new ApiError(catalog.getCode(), customMessage, catalog.getSuggestion(), null);
-        }
-
-        public static ApiError fromCatalog(ErrorCatalog catalog, Map<String, String> details) {
-            return new ApiError(catalog.getCode(), catalog.getMessage(), catalog.getSuggestion(), details);
-        }
+        return new ApiResponse<>(
+                true,
+                status.value(),
+                message,
+                data,
+                null,
+                path,
+                traceId,
+                null,
+                OffsetDateTime.now()
+        );
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record PaginationMeta(
-            int page,
-            int size,
-            long totalElements,
-            int totalPages
-    ) {}
-
-    public static <T> ApiResponse<T> success(T data, String message, HttpStatus status, String path, String traceId) {
-        return new ApiResponse<>(true, status.value(), message, data, null, path, traceId, null, OffsetDateTime.now());
+    public static <T> ApiResponse<T> success(
+            T data,
+            String message
+    ) {
+        return success(
+                data,
+                message,
+                HttpStatus.OK,
+                null,
+                null
+        );
     }
 
-    public static <T> ApiResponse<T> success(T data, String message) {
-        return success(data, message, HttpStatus.OK, null, null);
+    public static <T> ApiResponse<T> paginated(
+            T data,
+            PaginationMeta meta,
+            String message,
+            String path,
+            String traceId
+    ) {
+        return new ApiResponse<>(
+                true,
+                HttpStatus.OK.value(),
+                message,
+                data,
+                null,
+                path,
+                traceId,
+                meta,
+                OffsetDateTime.now()
+        );
     }
 
-    public static <T> ApiResponse<T> paginated(T data, PaginationMeta meta, String message, String path, String traceId) {
-        return new ApiResponse<>(true, HttpStatus.OK.value(), message, data, null, path, traceId, meta, OffsetDateTime.now());
-    }
-
-    public static <T> ApiResponse<T> error(HttpStatus status, ErrorCatalog catalog, String path, String traceId) {
+    public static <T> ApiResponse<T> error(
+            HttpStatus status,
+            ErrorCatalog catalog,
+            String path,
+            String traceId
+    ) {
         return new ApiResponse<>(
                 false,
                 status.value(),
@@ -74,13 +92,20 @@ public record ApiResponse<T>(
         );
     }
 
-    public static <T> ApiResponse<T> validationError(Map<String, String> validationErrors, String path, String traceId) {
+    public static <T> ApiResponse<T> validationError(
+            Map<String, String> validationErrors,
+            String path,
+            String traceId
+    ) {
         return new ApiResponse<>(
                 false,
                 HttpStatus.BAD_REQUEST.value(),
                 ErrorCatalog.VALIDATION_ERROR.getMessage(),
                 null,
-                ApiError.fromCatalog(ErrorCatalog.VALIDATION_ERROR, validationErrors),
+                ApiError.fromCatalog(
+                        ErrorCatalog.VALIDATION_ERROR,
+                        validationErrors
+                ),
                 path,
                 traceId,
                 null,
