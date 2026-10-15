@@ -92,6 +92,30 @@ public record ApiResponse<T>(
         );
     }
 
+    public static <T> ApiResponse<T> error(
+            HttpStatus status,
+            ErrorCatalog catalog,
+            String customMessage,
+            String path,
+            String traceId
+    ) {
+        String mensajeFinal = (customMessage != null && !customMessage.isBlank())
+                ? customMessage
+                : catalog.getMessage();
+
+        return new ApiResponse<>(
+                false,
+                status.value(),
+                mensajeFinal,
+                null,
+                ApiError.fromCatalog(catalog, mensajeFinal),
+                path,
+                traceId,
+                null,
+                OffsetDateTime.now()
+        );
+    }
+
     public static <T> ApiResponse<T> validationError(
             Map<String, String> validationErrors,
             String path,
