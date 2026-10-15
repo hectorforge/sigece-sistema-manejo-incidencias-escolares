@@ -1,24 +1,91 @@
 package pe.gob.minedu.sigece.usecases;
 
-import pe.edu.cibertec.sigece.domain.enums.CategoriaSiseve;
-import pe.edu.cibertec.sigece.service.dto.TipoIncidenciaDTO;
+import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaRequestDto;
+import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaResponseDto;
+import pe.gob.minedu.sigece.enums.CategoriaSiseve;
 
 import java.util.List;
 
 /**
- * Administra el catálogo homologado de tipologías de violencia escolar,
- * alineado a las categorías oficiales de SíSeVe, garantizando una
- * clasificación estandarizada y sin ambigüedad técnica o legal.
+ * Servicio encargado del catálogo de tipologías de violencia e incidencias homologadas con SíSeVe.
+ * Casos de uso asociados: CU06, CU07.
  */
 public interface ITipoIncidenciaService {
 
-    TipoIncidenciaDTO crear(TipoIncidenciaDTO dto);
+    /**
+     * Crea un nuevo tipo de incidencia en el catálogo institucional.
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia</b></p>
+     * <p>Rol: Administrador</p>
+     *
+     * @param dto Datos del tipo de incidencia a registrar.
+     * @return Tipo de incidencia creado.
+     */
+    TipoIncidenciaResponseDto crear(TipoIncidenciaRequestDto dto);
 
-    TipoIncidenciaDTO actualizar(Long id, TipoIncidenciaDTO dto);
+    /**
+     * Actualiza la información o categorización de un tipo de incidencia.
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia</b></p>
+     * <p>Rol: Administrador</p>
+     *
+     * @param id  Identificador único del tipo de incidencia.
+     * @param dto Datos modificados.
+     * @return Tipo de incidencia actualizado.
+     */
+    TipoIncidenciaResponseDto actualizar(Long id, TipoIncidenciaRequestDto dto);
 
+    /**
+     * Desactiva un tipo de incidencia para que no figure en nuevos registros.
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia</b></p>
+     * <p>Rol: Administrador</p>
+     *
+     * @param id Identificador del tipo de incidencia a desactivar.
+     */
     void desactivar(Long id);
 
-    List<TipoIncidenciaDTO> listarActivos();
+    /**
+     * Reactiva un tipo de incidencia desactivado previamente.
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia</b></p>
+     * <p>Rol: Administrador</p>
+     *
+     * @param id Identificador del tipo de incidencia a reactivar.
+     */
+    void reactivar(Long id);
 
-    List<TipoIncidenciaDTO> listarPorCategoriaSiseve(CategoriaSiseve categoria);
+    /**
+     * Obtiene el detalle de un tipo de incidencia por ID.
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia</b></p>
+     * <p>Rol: Administrador</p>
+     *
+     * @param id Identificador del tipo de incidencia.
+     * @return Información del tipo de incidencia.
+     */
+    TipoIncidenciaResponseDto obtenerPorId(Long id);
+
+    /**
+     * Lista todos los tipos de incidencia (activos e inactivos).
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia</b></p>
+     * <p>Rol: Administrador</p>
+     *
+     * @return Lista completa del catálogo.
+     */
+    List<TipoIncidenciaResponseDto> listarTodos();
+
+    /**
+     * Lista únicamente los tipos de incidencia actualmente activos.
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia, CU07 · Registrar incidencia</b></p>
+     * <p>Rol: Administrador, Personal educativo</p>
+     *
+     * @return Lista de tipos de incidencias activos.
+     */
+    List<TipoIncidenciaResponseDto> listarActivos();
+
+    /**
+     * Lista los tipos de incidencia asociados a una categoría específica de SíSeVe.
+     * <p>Caso de uso: <b>CU06 · Gestionar tipos de incidencia, CU07 · Registrar incidencia</b></p>
+     * <p>Rol: Administrador, Personal educativo</p>
+     *
+     * @param categoria Categoría oficial de violencia escolar según SíSeVe.
+     * @return Lista de tipos coincidentes con la categoría.
+     */
+    List<TipoIncidenciaResponseDto> listarPorCategoriaSiseve(CategoriaSiseve categoria);
 }

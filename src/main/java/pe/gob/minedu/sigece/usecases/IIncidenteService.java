@@ -1,96 +1,167 @@
 package pe.gob.minedu.sigece.usecases;
 
-import pe.edu.cibertec.sigece.domain.enums.EstadoIncidente;
-import pe.edu.cibertec.sigece.domain.enums.Gravedad;
-import pe.edu.cibertec.sigece.service.dto.*;
+import pe.gob.minedu.sigece.dtos.common.PagedResponse;
+import pe.gob.minedu.sigece.dtos.incidentes.AsignarResponsableRequestDto;
+import pe.gob.minedu.sigece.dtos.incidentes.CambiarEstadoRequestDto;
+import pe.gob.minedu.sigece.dtos.incidentes.CasoPendienteResponseDto;
+import pe.gob.minedu.sigece.dtos.incidentes.CerrarCasoRequestDto;
+import pe.gob.minedu.sigece.dtos.incidentes.CierreChecklistResponseDto;
+import pe.gob.minedu.sigece.dtos.incidentes.ClasificarGravedadRequestDto;
+import pe.gob.minedu.sigece.dtos.incidentes.IncidenteExpedienteResponseDto;
+import pe.gob.minedu.sigece.dtos.incidentes.IncidenteFiltroRequestDto;
+import pe.gob.minedu.sigece.dtos.incidentes.IncidenteRequestDto;
+import pe.gob.minedu.sigece.dtos.incidentes.IncidenteResponseDto;
+import pe.gob.minedu.sigece.dtos.incidentes.IncidenteResumenResponseDto;
+import pe.gob.minedu.sigece.dtos.incidentes.ReincidenciaRequestDto;
+import pe.gob.minedu.sigece.dtos.incidentes.ReincidenciaResponseDto;
+import pe.gob.minedu.sigece.enums.EstadoIncidente;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Orquesta el ciclo de vida del expediente de convivencia escolar,
- * conforme a las fases del D.S. N.° 004-2018-MINEDU:
- * Registro -> Clasificación -> Asignación -> Investigación -> Seguimiento -> Cierre/Derivación.
- *
- * Reemplaza el cuaderno físico de incidencias, centralizando el registro
- * y garantizando trazabilidad de cada expediente.
+ * Servicio central que gestiona el ciclo de vida del expediente de violencia escolar (D.S. N.° 004-2018-MINEDU).
+ * Casos de uso asociados: CU04, CU07, CU09, CU10, CU11, CU13, CU14, CU17, CU18.
  */
 public interface IIncidenteService {
 
     /**
-     * Registra un nuevo incidente (Fase de Registro). Genera automáticamente
-     * el codigoCaso correlativo (INC-YYYY-XXXXXX) y ejecuta la detección
-     * automática de reincidencia sobre los estudiantes involucrados.
+     * Registra un nuevo incidente de violencia escolar y apertura el expediente.
+     * <p>Caso de uso: <b>CU07 · Registrar incidencia</b></p>
+     * <p>Rol: Personal educativo (Tutor, Psicólogo)</p>
+     *
+     * @param dto               Datos iniciales del incidente ocurrido.
+     * @param usuarioReportaId  ID del usuario autenticado que emite el reporte.
+     * @return Resumen del incidente registrado.
      */
-    IncidenteDetalleDTO registrarIncidente(IncidenteRegistroDTO dto, Long usuarioReportaId);
+    IncidenteResponseDto registrarIncidente(IncidenteRequestDto dto, Long usuarioReportaId);
 
     /**
-     * Obtiene el expediente completo (datos, involucrados, acciones,
-     * adjuntos y notificaciones) para su visualización unificada.
+     * Obtiene el expediente integral de un caso con todos sus involucrados, seguimiento y evidencias.
+     * <p>Caso de uso: <b>CU09 · Consultar incidencia</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @param usuarioId   ID del usuario solicitante (para auditoría y control de acceso).
+     * @return Expediente completo y trazabilidad del caso.
      */
-    IncidenteDetalleDTO obtenerExpedienteCompleto(UUID incidenteId);
+    IncidenteExpedienteResponseDto obtenerExpedienteCompleto(UUID incidenteId, Long usuarioId);
 
     /**
-     * Clasifica o reclasifica la gravedad del caso (Fase de Clasificación),
-     * dejando trazabilidad del cambio para auditoría UGEL.
+     * Realiza búsquedas y filtrados paginados de incidentes registrados.
+     * <p>Caso de uso: <b>CU09 · Consultar incidencia</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param filtro    Criterios de filtrado por fechas, estados, niveles de gravedad, etc.
+     * @param usuarioId ID del usuario que consulta (aplica visibilidad de expedientes).
+     * @return Página de incidentes resumidos.
      */
-    IncidenteDetalleDTO clasificarGravedad(UUID incidenteId, Gravedad nuevaGravedad, Long usuarioId);
+    PagedResponse<IncidenteResumenResponseDto> buscarIncidentes(IncidenteFiltroRequestDto filtro, Long usuarioId);
 
     /**
-     * Asigna o reasigna el responsable actual del caso (tutor, psicólogo,
-     * miembro del Comité de Gestión del Bienestar) (Fase de Asignación).
+     * Clasifica oficialmente la gravedad de un caso (LEVE, MODERADO, GRAVE).
+     * <p>Caso de uso: <b>CU10 · Clasificar gravedad</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @param dto         Nivel de gravedad y sustentación técnica.
+     * @param usuarioId   ID del directivo que clasifica el caso.
+     * @return Incidente con la gravedad actualizada.
      */
-    IncidenteDetalleDTO asignarResponsable(UUID incidenteId, Long responsableUsuarioId, Long usuarioQueAsignaId);
+    IncidenteResponseDto clasificarGravedad(UUID incidenteId, ClasificarGravedadRequestDto dto, Long usuarioId);
 
     /**
-     * Transiciona el estado del expediente validando las reglas de flujo
-     * (p. ej. no se puede pasar a CERRADO sin acciones de seguimiento COMPLETADAS).
+     * Asigna a un usuario del personal (psicólogo, tutor) como responsable del seguimiento del caso.
+     * <p>Caso de uso: <b>CU11 · Asignar responsable</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @param incidenteId         Identificador UUID del incidente.
+     * @param dto                 Responsable asignado y consideraciones del encargo.
+     * @param usuarioQueAsignaId  ID del directivo que realiza la asignación.
+     * @return Incidente con el responsable actualizado.
      */
-    IncidenteDetalleDTO cambiarEstado(UUID incidenteId, EstadoIncidente nuevoEstado, Long usuarioId, String motivo);
+    IncidenteResponseDto asignarResponsable(UUID incidenteId, AsignarResponsableRequestDto dto, Long usuarioQueAsignaId);
 
     /**
-     * Cierra formalmente el expediente (Fase de Cierre), validando que
-     * existan acciones de seguimiento resueltas y notificaciones entregadas
-     * a los apoderados correspondientes.
+     * Realiza la transición de estado dentro del flujo del expediente escolar.
+     * <p>Caso de uso: <b>CU13 · Cambiar estado, CU17 · Derivar a SíSeVe</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @param dto         Nuevo estado y motivo del cambio.
+     * @param usuarioId   ID del usuario que autoriza y efectúa la transición.
+     * @return Incidente con el nuevo estado aplicado.
      */
-    IncidenteDetalleDTO cerrarCaso(UUID incidenteId, String actaCierre, Long usuarioId);
+    IncidenteResponseDto cambiarEstado(UUID incidenteId, CambiarEstadoRequestDto dto, Long usuarioId);
 
     /**
-     * Búsqueda paginada/filtrada para el tablero de gestión del Comité
-     * de Bienestar (por estado, gravedad, nivel, grado, rango de fechas,
-     * responsable asignado, etc.).
+     * Evalúa y devuelve las transiciones de estado legalmente válidas para el estado actual del expediente.
+     * <p>Caso de uso: <b>CU13 · Cambiar estado</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @return Lista de estados a los que se permite transicionar.
      */
-    List<IncidenteResumenDTO> buscarIncidentes(IncidenteFiltroDTO filtro);
+    List<EstadoIncidente> transicionesPermitidas(UUID incidenteId);
 
     /**
-     * Lista los casos vencidos o próximos a vencer según fecha_proxima_revision
-     * de sus acciones de seguimiento, para prevenir el estancamiento de expedientes.
+     * Valida el cumplimiento del checklist previo al cierre de un expediente (medidas, firmas, notificaciones).
+     * <p>Caso de uso: <b>CU14 · Cerrar caso</b></p>
+     * <p>Rol: Comité de Bienestar</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @return Estado de verificación de cada requisito exigido para cerrar.
      */
-    List<AlertaSeguimientoDTO> listarCasosPendientesDeAtencion(int diasUmbral);
+    CierreChecklistResponseDto evaluarRequisitosCierre(UUID incidenteId);
 
     /**
-     * Verifica si un estudiante presenta reincidencia (2+ incidentes con
-     * rolInvolucrado = AGRESOR o VICTIMA en una ventana temporal configurable)
-     * y marca automáticamente el flag `reincidencia` del nuevo incidente.
+     * Formaliza el cierre definitivo de un caso de violencia escolar.
+     * <p>Caso de uso: <b>CU14 · Cerrar caso</b></p>
+     * <p>Rol: Comité de Bienestar</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @param dto         Conclusiones de cierre, informe final y acuerdos alcanzados.
+     * @param usuarioId   ID del miembro del Comité que efectúa el cierre.
+     * @return Incidente en estado CERRADO.
      */
-    ReincidenciaReporteDTO evaluarReincidencia(Long estudianteId, LocalDate desde);
+    IncidenteResponseDto cerrarCaso(UUID incidenteId, CerrarCasoRequestDto dto, Long usuarioId);
 
     /**
-     * Historial cronológico de todos los incidentes en los que participó
-     * un estudiante determinado (para el análisis de patrones de conducta).
+     * Obtiene los casos que han superado el umbral de días sin registrar avances o atención.
+     * <p>Caso de uso: <b>CU18 · Generar alertas</b></p>
+     * <p>Rol: Scheduler, Personal de gestión</p>
+     *
+     * @param diasUmbral Número máximo de días sin movimiento permitidos.
+     * @return Lista de casos en condición de estancamiento.
      */
-    List<IncidenteResumenDTO> obtenerHistorialPorEstudiante(Long estudianteId);
+    List<CasoPendienteResponseDto> listarCasosPendientesDeAtencion(int diasUmbral);
 
     /**
-     * Genera el código correlativo institucional único del caso
-     * (formato INC-YYYY-XXXXXX) usado para inspección y auditoría UGEL.
+     * Evalúa si los involucrados presentan reincidencia en incidentes previos registrados.
+     * <p>Caso de uso: <b>CU07 · Registrar incidencia, CU18 · Generar alertas</b></p>
+     * <p>Rol: Personal educativo, Scheduler</p>
+     *
+     * @param dto Datos del estudiante y contexto a evaluar.
+     * @return Resultado del análisis de reincidencia.
+     */
+    ReincidenciaResponseDto evaluarReincidencia(ReincidenciaRequestDto dto);
+
+    /**
+     * Lista el resumen histórico de incidentes asociados a un estudiante determinado.
+     * <p>Caso de uso: <b>CU04 · Gestionar estudiantes, CU09 · Consultar incidencia</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param estudianteId Identificador del estudiante.
+     * @return Historial resumido de casos asociados.
+     */
+    List<IncidenteResumenResponseDto> obtenerHistorialPorEstudiante(Long estudianteId);
+
+    /**
+     * Genera el código institucional correlativo y correlacionado para un nuevo expediente (ej. EXP-2026-0001).
+     * <p>Caso de uso: <b>CU07 · Registrar incidencia</b></p>
+     * <p>Rol: Personal educativo (Tutor, Psicólogo)</p>
+     *
+     * @return Código único correlativo generado.
      */
     String generarCodigoCaso();
-
-    /**
-     * Indicadores agregados para el dashboard directivo: casos por estado,
-     * por gravedad, por nivel/grado, tiempo promedio de resolución, etc.
-     */
-    DashboardIndicadoresDTO obtenerIndicadoresDashboard(LocalDate desde, LocalDate hasta);
 }

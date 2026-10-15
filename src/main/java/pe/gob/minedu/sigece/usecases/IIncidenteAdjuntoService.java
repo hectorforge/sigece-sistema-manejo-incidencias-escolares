@@ -1,48 +1,86 @@
 package pe.gob.minedu.sigece.usecases;
 
 import org.springframework.web.multipart.MultipartFile;
-import pe.edu.cibertec.sigece.service.dto.AdjuntoDTO;
+import pe.gob.minedu.sigece.dtos.adjuntos.AdjuntoRequestDto;
+import pe.gob.minedu.sigece.dtos.adjuntos.AdjuntoResponseDto;
+import pe.gob.minedu.sigece.dtos.adjuntos.AdjuntoUrlResponseDto;
+import pe.gob.minedu.sigece.dtos.adjuntos.EliminarAdjuntoRequestDto;
+import pe.gob.minedu.sigece.dtos.adjuntos.IntegridadResponseDto;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Gestiona las evidencias digitales del caso (capturas de ciberacoso,
- * actas firmadas escaneadas, fotografías) sobre Azure Blob Storage,
- * resolviendo la pérdida probatoria propia del expediente físico.
+ * Servicio encargado de la gestión de evidencias digitales (Azure Blob Storage) con hash SHA-256.
+ * Casos de uso asociados: CU07, CU09, CU15.
  */
 public interface IIncidenteAdjuntoService {
 
     /**
-     * Sube un archivo de evidencia al contenedor Azure Blob Storage,
-     * calcula su hash SHA-256 (cadena de custodia) y persiste sus
-     * metadatos asociados al incidente (y opcionalmente a una acción
-     * de seguimiento específica).
+     * Sube y asocia una evidencia digital individual al expediente calculando su hash de integridad.
+     * <p>Caso de uso: <b>CU15 · Gestionar evidencias, CU07 · Registrar incidencia</b></p>
+     * <p>Rol: Tutor, Psicólogo</p>
+     *
+     * @param incidenteId Identificador UUID del expediente.
+     * @param dto         Metadatos de la evidencia (tipo, descripción).
+     * @param archivo     Archivo binario recibido vía multipart.
+     * @param usuarioId   ID del usuario que sube el archivo.
+     * @return Información de la evidencia almacenada.
      */
-    AdjuntoDTO subirEvidencia(UUID incidenteId, Long accionId, MultipartFile archivo, Long usuarioId);
+    AdjuntoResponseDto subirEvidencia(UUID incidenteId, AdjuntoRequestDto dto, MultipartFile archivo, Long usuarioId);
 
     /**
-     * Genera una URL de descarga temporal (SAS token) para visualizar
-     * o descargar el archivo de forma segura y auditable.
+     * Sube múltiples evidencias digitales en un único proceso por lotes.
+     * <p>Caso de uso: <b>CU15 · Gestionar evidencias, CU07 · Registrar incidencia</b></p>
+     * <p>Rol: Tutor, Psicólogo</p>
+     *
+     * @param incidenteId Identificador UUID del expediente.
+     * @param dto         Metadatos comunes o descriptivos de los adjuntos.
+     * @param archivos    Colección de archivos binarios recibidos.
+     * @param usuarioId   ID del usuario que sube los archivos.
+     * @return Lista de evidencias almacenadas.
      */
-    String generarUrlDescargaTemporal(Long adjuntoId, int minutosExpiracion);
+    List<AdjuntoResponseDto> subirEvidencias(UUID incidenteId, AdjuntoRequestDto dto, List<MultipartFile> archivos, Long usuarioId);
 
     /**
-     * Verifica la integridad del archivo comparando el hash SHA-256
-     * almacenado contra el hash recalculado del blob, para descartar
-     * alteración de evidencia probatoria.
+     * Genera un URL temporal y seguro (SAS Token) para la visualización o descarga de un archivo.
+     * <p>Caso de uso: <b>CU15 · Gestionar evidencias</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param adjuntoId         Identificador único del adjunto.
+     * @param minutosExpiracion Tiempo de vida en minutos del URL temporal generado.
+     * @return Enlace temporal firmado de descarga.
      */
-    boolean verificarIntegridad(Long adjuntoId);
+    AdjuntoUrlResponseDto generarUrlDescargaTemporal(Long adjuntoId, int minutosExpiracion);
 
     /**
-     * Lista todas las evidencias digitales adjuntas a un incidente.
+     * Verifica la integridad criptográfica del archivo comparando su contenido en Blob Storage contra el SHA-256 registrado.
+     * <p>Caso de uso: <b>CU15 · Gestionar evidencias</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param adjuntoId Identificador del archivo a comprobar.
+     * @return Resultado del chequeo de integridad y correspondencia de hash.
      */
-    List<AdjuntoDTO> listarPorIncidente(UUID incidenteId);
+    IntegridadResponseDto verificarIntegridad(Long adjuntoId);
 
     /**
-     * Elimina un adjunto (soft-delete recomendado a nivel de blob;
-     * restringido a roles ROLE_DIRECTOR / ROLE_ADMIN) dejando registro
-     * de auditoría de quién y cuándo lo eliminó.
+     * Lista todas las evidencias digitales asociadas a un caso.
+     * <p>Caso de uso: <b>CU15 · Gestionar evidencias, CU09 · Consultar incidencia</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param incidenteId Identificador UUID del expediente.
+     * @return Lista de adjuntos asociados al caso.
      */
-    void eliminarAdjunto(Long adjuntoId, Long usuarioId);
+    List<AdjuntoResponseDto> listarPorIncidente(UUID incidenteId);
+
+    /**
+     * Elimina lógicamente un archivo adjunto del expediente justificando el motivo en auditoría.
+     * <p>Caso de uso: <b>CU15 · Gestionar evidencias</b></p>
+     * <p>Rol: Tutor, Psicólogo</p>
+     *
+     * @param adjuntoId Identificador del archivo adjunto a eliminar.
+     * @param dto       Justificación técnica o legal del retiro.
+     * @param usuarioId ID del usuario que solicita la eliminación.
+     */
+    void eliminarAdjunto(Long adjuntoId, EliminarAdjuntoRequestDto dto, Long usuarioId);
 }

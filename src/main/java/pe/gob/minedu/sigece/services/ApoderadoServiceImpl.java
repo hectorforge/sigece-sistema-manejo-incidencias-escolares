@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoFiltroRequestDto;
 import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoRequestDto;
 import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoResponseDto;
+import pe.gob.minedu.sigece.dtos.apoderados.VinculoFamiliarResponseDto;
+import pe.gob.minedu.sigece.dtos.common.PagedResponse;
 import pe.gob.minedu.sigece.mappers.ApoderadoMapper;
 import pe.gob.minedu.sigece.persistence.repositories.IApoderadoRepository;
 import pe.gob.minedu.sigece.usecases.IApoderadoService;
@@ -76,6 +79,11 @@ public class ApoderadoServiceImpl implements IApoderadoService {
     }
 
     @Override
+    public List<VinculoFamiliarResponseDto> listarVinculosPorApoderado(Long apoderadoId) {
+        return List.of();
+    }
+
+    @Override
     @Transactional
     public void marcarContactoPrincipal(Long estudianteId, Long apoderadoId) {
         log.info("Marcando apoderado ID: {} como contacto principal para estudiante ID: {}", apoderadoId, estudianteId);
@@ -91,5 +99,10 @@ public class ApoderadoServiceImpl implements IApoderadoService {
             throw new EntityNotFoundException(
                     "No se encontró la relación entre el estudiante ID: " + estudianteId + " y el apoderado ID: " + apoderadoId);
         }
+    }
+
+    @Override
+    public PagedResponse<ApoderadoResponseDto> buscar(ApoderadoFiltroRequestDto filtro) {
+        return null;
     }
 }

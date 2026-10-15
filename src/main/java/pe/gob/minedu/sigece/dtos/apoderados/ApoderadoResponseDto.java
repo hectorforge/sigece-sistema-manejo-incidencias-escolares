@@ -15,18 +15,4 @@ public record ApoderadoResponseDto(
         String correo,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
-) {
-    public static ApoderadoResponseDto fromEntity(Apoderado apoderado) {
-        return new ApoderadoResponseDto(
-                apoderado.getId(),
-                apoderado.getNombres(),
-                apoderado.getApellidos(),
-                apoderado.getTipoDocumento(),
-                apoderado.getNumeroDocumento(),
-                apoderado.getTelefono(),
-                apoderado.getCorreo(),
-                apoderado.getCreatedAt(),
-                apoderado.getUpdatedAt()
-        );
-    }
-}
+) { }

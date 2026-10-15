@@ -1,4 +1,4 @@
-package pe.gob.minedu.sigece.dtos;
+package pe.gob.minedu.sigece.dtos.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;

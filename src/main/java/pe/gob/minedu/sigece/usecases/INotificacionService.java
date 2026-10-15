@@ -1,57 +1,80 @@
 package pe.gob.minedu.sigece.usecases;
 
-import pe.edu.cibertec.sigece.domain.enums.CanalNotificacion;
-import pe.edu.cibertec.sigece.domain.enums.EstadoEnvio;
-import pe.edu.cibertec.sigece.service.dto.NotificacionDTO;
-import pe.edu.cibertec.sigece.service.dto.NotificacionEnvioResultDTO;
+import pe.gob.minedu.sigece.dtos.notificaciones.EstadoEnvioRequestDto;
+import pe.gob.minedu.sigece.dtos.notificaciones.NotificacionEnvioResponseDto;
+import pe.gob.minedu.sigece.dtos.notificaciones.NotificacionRequestDto;
+import pe.gob.minedu.sigece.dtos.notificaciones.NotificacionResponseDto;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Erradica la falla estructural de la agenda escolar en papel: envía
- * y audita las comunicaciones a los apoderados (EMAIL, SMS, WHATSAPP,
- * llamada o citación presencial) generando constancia legal exigible
- * ante una eventual fiscalización de UGEL/SíSeVe.
+ * Servicio encargado de gestionar y auditar las notificaciones enviadas a los apoderados.
+ * Casos de uso asociados: CU09, CU14, CU16.
  */
 public interface INotificacionService {
 
     /**
-     * Genera y envía una notificación a él/los apoderado(s) del(los)
-     * estudiante(s) involucrado(s) en el incidente, priorizando el
-     * contacto marcado como es_contacto_principal.
+     * Envía notificaciones a los apoderados del estudiante mediante los canales configurados (EMAIL, SMS, WhatsApp, etc.).
+     * <p>Caso de uso: <b>CU16 · Notificar apoderados</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @param incidenteId Identificador UUID del caso asociado.
+     * @param dto         Canal, destinatarios, asunto y cuerpo del mensaje.
+     * @param usuarioId   ID del usuario que autoriza y dispara la notificación.
+     * @return Resultado del intento de envío.
      */
-    NotificacionEnvioResultDTO notificarApoderados(UUID incidenteId, CanalNotificacion canal,
-                                                    String asunto, String mensaje, Long usuarioId);
+    NotificacionEnvioResponseDto notificarApoderados(UUID incidenteId, NotificacionRequestDto dto, Long usuarioId);
 
     /**
-     * Actualiza el estado de entrega de una notificación a partir del
-     * webhook/callback del proveedor externo (SendGrid, Twilio, WhatsApp
-     * Cloud API), registrando el id_transaccion_externo como evidencia.
+     * Actualiza el estado de recepción o entrega de una notificación (ej. ENTREGADO, REBOTADO, LEÍDO).
+     * <p>Caso de uso: <b>CU16 · Notificar apoderados</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @param notificacionId Identificador de la notificación enviada.
+     * @param dto            Nuevo estado de entrega y constancia de recepción.
+     * @return Notificación con el estado actualizado.
      */
-    NotificacionDTO actualizarEstadoEnvio(Long notificacionId, EstadoEnvio nuevoEstado, String idTransaccionExterno);
+    NotificacionResponseDto actualizarEstadoEnvio(Long notificacionId, EstadoEnvioRequestDto dto);
 
     /**
-     * Reintenta el envío de una notificación marcada como FALLIDO.
+     * Reintenta el envío de una notificación cuyo intento previo haya fallado.
+     * <p>Caso de uso: <b>CU16 · Notificar apoderados</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @param notificacionId Identificador del registro fallido.
+     * @param usuarioId      ID del usuario que autoriza el reintento.
+     * @return Resultado del nuevo intento de envío.
      */
-    NotificacionEnvioResultDTO reintentarEnvio(Long notificacionId, Long usuarioId);
+    NotificacionEnvioResponseDto reintentarEnvio(Long notificacionId, Long usuarioId);
 
     /**
-     * Lista todas las notificaciones enviadas sobre un incidente, con
-     * su estado de entrega, para trazabilidad ante el apoderado y auditoría.
+     * Lista todas las comunicaciones y citaciones emitidas en el marco de un expediente específico.
+     * <p>Caso de uso: <b>CU16 · Notificar apoderados, CU09 · Consultar incidencia</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param incidenteId Identificador UUID del caso.
+     * @return Historial de comunicaciones del caso.
      */
-    List<NotificacionDTO> listarPorIncidente(UUID incidenteId);
+    List<NotificacionResponseDto> listarPorIncidente(UUID incidenteId);
 
     /**
-     * Verifica si el (los) apoderado(s) principal(es) de un incidente ya
-     * fueron notificados exitosamente (ENTREGADO/LEIDO), condición
-     * habitualmente exigida antes de avanzar de estado el expediente.
+     * Comprueba si los apoderados principales de las partes involucradas han sido efectivamente notificados.
+     * <p>Caso de uso: <b>CU14 · Cerrar caso</b></p>
+     * <p>Rol: Comité de Bienestar</p>
+     *
+     * @param incidenteId Identificador UUID del expediente.
+     * @return {@code true} si cuentan con constancia fehaciente de notificación; {@code false} en caso contrario.
      */
     boolean apoderadosPrincipalesNotificados(UUID incidenteId);
 
     /**
-     * Historial de comunicaciones dirigidas a un apoderado específico,
-     * independientemente del incidente (vista consolidada del padre/madre).
+     * Lista todas las notificaciones históricas recibidas por un apoderado en particular.
+     * <p>Caso de uso: <b>CU16 · Notificar apoderados</b></p>
+     * <p>Rol: Personal de gestión, Administrador</p>
+     *
+     * @param apoderadoId Identificador único del apoderado.
+     * @return Lista de notificaciones dirigidas al apoderado.
      */
-    List<NotificacionDTO> listarPorApoderado(Long apoderadoId);
+    List<NotificacionResponseDto> listarPorApoderado(Long apoderadoId);
 }

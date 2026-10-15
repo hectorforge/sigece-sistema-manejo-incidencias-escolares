@@ -1,63 +1,112 @@
 package pe.gob.minedu.sigece.usecases;
 
-import java.time.LocalDate;
+import pe.gob.minedu.sigece.dtos.seguimiento.AccionEstadoRequestDto;
+import pe.gob.minedu.sigece.dtos.seguimiento.AccionFiltroRequestDto;
+import pe.gob.minedu.sigece.dtos.seguimiento.AccionRevisionRequestDto;
+import pe.gob.minedu.sigece.dtos.seguimiento.AccionSeguimientoRequestDto;
+import pe.gob.minedu.sigece.dtos.seguimiento.AccionSeguimientoResponseDto;
+
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Bitácora de trazabilidad de medidas correctivas, entrevistas y
- * derivaciones psicológicas. Evita la ruptura entre el registro
- * inicial del caso y su efectivo cierre o resolución.
+ * Servicio encargado de la bitácora de seguimiento, medidas correctivas, compromisos y citas.
+ * Casos de uso asociados: CU09, CU12, CU14, CU18, CU20.
  */
 public interface IAccionSeguimientoService {
 
     /**
-     * Registra una nueva acción de seguimiento (entrevista, derivación
-     * a psicología, medida formativa, derivación a DEMUNA/CEM, acta de
-     * compromiso, etc.) sobre un expediente en curso.
+     * Registra una nueva acción o compromiso en la bitácora de seguimiento del incidente.
+     * <p>Caso de uso: <b>CU12 · Gestionar seguimiento</b></p>
+     * <p>Rol: Tutor, Psicólogo, Comité</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @param dto         Detalle de la acción, tipo de medida, fecha programada y acuerdos.
+     * @param usuarioId   ID del usuario que registra la acción.
+     * @return Acción de seguimiento creada.
      */
-    AccionSeguimientoDTO registrarAccion(UUID incidenteId, AccionSeguimientoDTO dto, Long usuarioId);
+    AccionSeguimientoResponseDto registrarAccion(UUID incidenteId, AccionSeguimientoRequestDto dto, Long usuarioId);
 
     /**
-     * Actualiza el estado de avance de una acción (PENDIENTE -> EN_PROCESO -> COMPLETADA).
+     * Actualiza el estado de cumplimiento (ej. COMPLETADA, CANCELADA) de una acción.
+     * <p>Caso de uso: <b>CU12 · Gestionar seguimiento</b></p>
+     * <p>Rol: Tutor, Psicólogo, Comité</p>
+     *
+     * @param accionId  Identificador de la acción de seguimiento.
+     * @param dto       Nuevo estado y comentarios de ejecución.
+     * @param usuarioId ID del usuario que actualiza el estado.
+     * @return Acción con el estado modificado.
      */
-    AccionSeguimientoDTO actualizarEstadoAccion(Long accionId, EstadoAccion nuevoEstado, Long usuarioId);
+    AccionSeguimientoResponseDto actualizarEstadoAccion(Long accionId, AccionEstadoRequestDto dto, Long usuarioId);
 
     /**
-     * Reprograma la fecha de próxima revisión de una acción de seguimiento
-     * (p. ej. cita de reevaluación psicológica).
+     * Reprograma la fecha proyectada de revisión o seguimiento de una acción.
+     * <p>Caso de uso: <b>CU12 · Gestionar seguimiento</b></p>
+     * <p>Rol: Tutor, Psicólogo, Comité</p>
+     *
+     * @param accionId  Identificador de la acción a reprogramar.
+     * @param dto       Nueva fecha estipulada y justificación de la postergación.
+     * @param usuarioId ID del usuario que reprograma.
+     * @return Acción actualizada con la nueva fecha.
      */
-    AccionSeguimientoDTO reprogramarProximaRevision(Long accionId, LocalDate nuevaFecha, Long usuarioId);
+    AccionSeguimientoResponseDto reprogramarProximaRevision(Long accionId, AccionRevisionRequestDto dto, Long usuarioId);
 
     /**
-     * Lista cronológica de todas las acciones ejecutadas sobre un incidente,
-     * insumo principal para reconstruir la línea de tiempo del caso.
+     * Obtiene una acción de seguimiento por su ID único.
+     * <p>Caso de uso: <b>CU12 · Gestionar seguimiento</b></p>
+     * <p>Rol: Tutor, Psicólogo, Comité</p>
+     *
+     * @param accionId Identificador de la acción.
+     * @return Detalle de la acción solicitada.
      */
-    List<AccionSeguimientoDTO> listarPorIncidente(UUID incidenteId);
+    AccionSeguimientoResponseDto obtenerPorId(Long accionId);
 
     /**
-     * Lista las acciones pendientes o en proceso asignadas a un usuario
-     * (tutor/psicólogo), para su bandeja personal de tareas.
+     * Lista todas las acciones de seguimiento ejecutadas y programadas para un caso.
+     * <p>Caso de uso: <b>CU12 · Gestionar seguimiento, CU09 · Consultar incidencia</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @return Lista cronológica de acciones de seguimiento.
      */
-    List<AccionSeguimientoDTO> listarPendientesPorUsuario(Long usuarioId);
+    List<AccionSeguimientoResponseDto> listarPorIncidente(UUID incidenteId);
 
     /**
-     * Identifica acciones cuya fecha_proxima_revision ya venció sin haberse
-     * completado, para alimentar alertas automáticas al Comité de Bienestar.
+     * Lista las acciones de seguimiento pendientes de ejecución asignadas a un usuario específico.
+     * <p>Caso de uso: <b>CU12 · Gestionar seguimiento</b></p>
+     * <p>Rol: Tutor, Psicólogo, Comité</p>
+     *
+     * @param usuarioId Identificador del usuario responsable.
+     * @return Lista de acciones pendientes del usuario.
      */
-    List<AccionSeguimientoDTO> listarAccionesVencidas();
+    List<AccionSeguimientoResponseDto> listarPendientesPorUsuario(Long usuarioId);
 
     /**
-     * Valida si un incidente cuenta con todas sus acciones en estado
-     * COMPLETADA, condición previa obligatoria para permitir el cierre
-     * del expediente (regla de negocio de IncidenteService.cerrarCaso).
+     * Lista todas las acciones cuya fecha límite ha expirado y continúan pendientes en el sistema.
+     * <p>Caso de uso: <b>CU18 · Generar alertas</b></p>
+     * <p>Rol: Scheduler, Personal de gestión</p>
+     *
+     * @return Lista de acciones vencidas.
+     */
+    List<AccionSeguimientoResponseDto> listarAccionesVencidas();
+
+    /**
+     * Verifica si la totalidad de las acciones pactadas para un expediente se encuentran completadas.
+     * <p>Caso de uso: <b>CU14 · Cerrar caso</b></p>
+     * <p>Rol: Comité de Bienestar</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @return {@code true} si todas las acciones están completadas; {@code false} de lo contrario.
      */
     boolean todasLasAccionesCompletadas(UUID incidenteId);
 
     /**
-     * Filtra el historial de acciones por tipo (p. ej. todas las
-     * DERIVACION_DEMUNA_CEM en un periodo), para reportes estadísticos
-     * ante UGEL.
+     * Lista acciones de seguimiento filtradas por tipo de medida o estado de avance.
+     * <p>Caso de uso: <b>CU12 · Gestionar seguimiento, CU20 · Generar y exportar reportes</b></p>
+     * <p>Rol: Tutor, Psicólogo, Comité, Personal de gestión</p>
+     *
+     * @param filtro Criterios de filtrado (tipo de acción, rango de fechas, etc.).
+     * @return Lista de acciones que cumplen el filtro.
      */
-    List<AccionSeguimientoDTO> listarPorTipo(TipoAccion tipo, LocalDate desde, LocalDate hasta);
+    List<AccionSeguimientoResponseDto> listarPorTipo(AccionFiltroRequestDto filtro);
 }

@@ -1,42 +1,67 @@
 package pe.gob.minedu.sigece.usecases;
 
-import pe.edu.cibertec.sigece.service.dto.SiseveDerivacionRequestDTO;
-import pe.edu.cibertec.sigece.service.dto.SiseveDerivacionResponseDTO;
+import pe.gob.minedu.sigece.dtos.siseve.SiseveDerivacionRequestDto;
+import pe.gob.minedu.sigece.dtos.siseve.SiseveDerivacionResponseDto;
+import pe.gob.minedu.sigece.dtos.siseve.SiseveEvaluacionResponseDto;
+import pe.gob.minedu.sigece.dtos.siseve.SisevePendienteResponseDto;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Encapsula la interoperabilidad/derivación hacia el sistema nacional
- * SíSeVe (MINEDU), exigida por la Ley N.° 29719 y el D.S. N.° 004-2018-MINEDU
- * para los casos que superan el ámbito de atención interna de la IE
- * (gravedad GRAVE/MUY_GRAVE, violencia sexual, reincidencia crítica, etc.).
+ * Servicio encargado del cumplimiento normativo de derivación de casos graves al portal SíSeVe (MINEDU).
+ * Casos de uso asociados: CU17, CU18, CU19.
  */
 public interface ISiseveDerivacionService {
 
     /**
-     * Evalúa si un incidente cumple los criterios normativos de derivación
-     * obligatoria a SíSeVe (p. ej. categoría SEXUAL, gravedad MUY_GRAVE).
+     * Determina si por la tipología y gravedad del caso existe obligación legal de derivarlo a SíSeVe.
+     * <p>Caso de uso: <b>CU17 · Derivar a SíSeVe, CU18 · Generar alertas</b></p>
+     * <p>Rol: Psicólogo, Personal de gestión, Scheduler</p>
+     *
+     * @param incidenteId Identificador UUID del expediente.
+     * @return {@code true} si es imperativa la derivación; {@code false} si es opcional o de manejo interno.
      */
     boolean requiereDerivacionObligatoria(UUID incidenteId);
 
     /**
-     * Deriva formalmente el caso a la plataforma SíSeVe, transiciona el
-     * incidente a estado DERIVADO_SISEVE y persiste el código de referencia
-     * devuelto por la plataforma nacional.
+     * Evalúa los antecedentes y la gravedad del caso emitiendo una recomendación formal técnica para derivación.
+     * <p>Caso de uso: <b>CU17 · Derivar a SíSeVe</b></p>
+     * <p>Rol: Psicólogo, Personal de gestión</p>
+     *
+     * @param incidenteId Identificador UUID del expediente.
+     * @return Evaluación y recomendación de derivación externa.
      */
-    SiseveDerivacionResponseDTO derivarCaso(UUID incidenteId, SiseveDerivacionRequestDTO dto, Long usuarioId);
+    SiseveEvaluacionResponseDto evaluarDerivacion(UUID incidenteId);
 
     /**
-     * Consulta el estado actual de un caso ya derivado, contrastando la
-     * fecha_reporte_siseve y el codigo_siseve almacenados localmente.
+     * Registra formalmente la derivación del caso hacia la plataforma externa de SíSeVe o el ingreso del código de registro oficial.
+     * <p>Caso de uso: <b>CU17 · Derivar a SíSeVe</b></p>
+     * <p>Rol: Psicólogo, Personal de gestión</p>
+     *
+     * @param incidenteId Identificador UUID del expediente.
+     * @param dto         Código de reporte en SíSeVe, informe adjunto y observaciones de la derivación.
+     * @param usuarioId   ID del usuario que realiza la derivación.
+     * @return Constancia y detalles de la derivación efectuada.
      */
-    SiseveDerivacionResponseDTO consultarEstadoDerivacion(UUID incidenteId);
+    SiseveDerivacionResponseDto derivarCaso(UUID incidenteId, SiseveDerivacionRequestDto dto, Long usuarioId);
 
     /**
-     * Lista todos los incidentes pendientes de derivación obligatoria
-     * que aún no han sido reportados a SíSeVe (control de cumplimiento
-     * normativo para el Director/Comité de Bienestar).
+     * Consulta el estado actual de la derivación ante el sistema SíSeVe para el caso dado.
+     * <p>Caso de uso: <b>CU17 · Derivar a SíSeVe</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @param incidenteId Identificador UUID del incidente.
+     * @return Estado del trámite de derivación.
      */
-    List<UUID> listarPendientesDeDerivacionObligatoria();
+    SiseveDerivacionResponseDto consultarEstadoDerivacion(UUID incidenteId);
+
+    /**
+     * Lista todos los casos que requieren derivación obligatoria y que aún no han sido derivados.
+     * <p>Caso de uso: <b>CU17 · Derivar a SíSeVe, CU18 · Generar alertas, CU19 · Dashboard de indicadores</b></p>
+     * <p>Rol: Personal de gestión (Director, Comité)</p>
+     *
+     * @return Lista de casos pendientes de derivación mandatoria.
+     */
+    List<SisevePendienteResponseDto> listarPendientesDeDerivacionObligatoria();
 }
