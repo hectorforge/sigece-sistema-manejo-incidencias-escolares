@@ -1,3 +1,4 @@
+--base de datos actualizada
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- =====================================================================================
