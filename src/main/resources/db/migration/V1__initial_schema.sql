@@ -1,4 +1,4 @@
---base de datos actualizada
+--base de datos actualizada 23/10/2026
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- =====================================================================================
