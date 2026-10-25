@@ -11,10 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import pe.gob.minedu.sigece.enums.EstadoDerivacion;
-import pe.gob.minedu.sigece.enums.EstadoIncidente;
-import pe.gob.minedu.sigece.enums.Gravedad;
-import pe.gob.minedu.sigece.enums.ModoDerivacion;
+import pe.gob.minedu.sigece.enums.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -33,6 +30,7 @@ public class Incidente {
     private UUID id;
 
     @NotBlank
+    @Pattern(regexp = "^INC-[0-9]{4}-[0-9]{6}$")
     @Size(max = 30)
     @Column(name = "codigo_caso", nullable = false, unique = true, length = 30)
     private String codigoCaso;
@@ -58,6 +56,11 @@ public class Incidente {
     private String lugarOcurrencia;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "medio_ocurrencia", nullable = false, length = 20)
+    private MedioOcurrencia medioOcurrencia = MedioOcurrencia.PRESENCIAL;
+
+    @NotNull
     @Column(name = "fecha_ocurrencia", nullable = false)
     private OffsetDateTime fechaOcurrencia;
 
@@ -76,17 +79,34 @@ public class Incidente {
             foreignKey = @ForeignKey(name = "fk_incidentes_reportado_por"))
     private Usuario reportadoPor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "responsable_actual_id",
-            foreignKey = @ForeignKey(name = "fk_incidentes_responsable"))
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "responsable_actual_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_incidentes_responsable")
+    )
     private Usuario responsableActual;
 
     @NotNull
-    @Column(name = "reincidencia", nullable = false)
-    private Boolean reincidencia = false;
+    @Column(name = "notificar_apoderado", nullable = false)
+    private Boolean notificarApoderado = false;
+
+    @Column(name = "fecha_resolucion")
+    private OffsetDateTime fechaResolucion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "resuelto_por_id",
+            foreignKey = @ForeignKey(name = "fk_incidentes_resuelto_por")
+    )
+    private Usuario resueltoPor;
 
     @Column(name = "acta_cierre", columnDefinition = "TEXT")
     private String actaCierre;
+
+    @Column(name = "conclusiones_finales", columnDefinition = "TEXT")
+    private String conclusionesFinales;
 
     @Column(name = "fecha_cierre")
     private OffsetDateTime fechaCierre;
@@ -99,15 +119,6 @@ public class Incidente {
     @NotNull
     @Column(name = "reportado_siseve", nullable = false)
     private Boolean reportadoSiseve = false;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado_derivacion", nullable = false, length = 20)
-    private EstadoDerivacion estadoDerivacion = EstadoDerivacion.NO_DERIVADA;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "modo_derivacion", length = 20)
-    private ModoDerivacion modoDerivacion;
 
     @Column(name = "fecha_reporte_siseve")
     private OffsetDateTime fechaReporteSiseve;
@@ -123,10 +134,6 @@ public class Incidente {
     @JoinColumn(name = "derivado_por_id",
             foreignKey = @ForeignKey(name = "fk_incidentes_derivado_por"))
     private Usuario derivadoPor;
-
-    @Size(max = 500)
-    @Column(name = "error_integracion_siseve", length = 500)
-    private String errorIntegracionSiseve;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

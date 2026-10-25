@@ -40,7 +40,7 @@ public class Apoderado {
     private TipoDocumento tipoDocumento = TipoDocumento.DNI;
 
     @NotBlank
-    @Size(min = 8, max = 15)
+    @Size(min = 8)
     @Column(name = "numero_documento", nullable = false, unique = true, length = 15)
     private String numeroDocumento;
 

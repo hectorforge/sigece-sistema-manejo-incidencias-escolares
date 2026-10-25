@@ -36,7 +36,7 @@ public interface IIncidenteInvolucradoService {
      * @param dto           Motivo y sustento formal del retiro.
      * @param usuarioId     ID del usuario que efectúa el retiro.
      */
-    void removerInvolucrado(Long involucradoId, RemoverInvolucradoRequestDto dto, Long usuarioId);
+    void removerInvolucrado(UUID incidenteId, Long involucradoId, RemoverInvolucradoRequestDto dto, Long usuarioId);
 
     /**
      * Lista todos los participantes asociados a un incidente.

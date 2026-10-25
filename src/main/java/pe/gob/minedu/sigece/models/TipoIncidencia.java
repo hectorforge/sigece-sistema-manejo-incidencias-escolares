@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pe.gob.minedu.sigece.enums.CategoriaSiseve;
+import pe.gob.minedu.sigece.enums.Gravedad;
 
 @Entity
 @Table(name = "tipos_incidencia")
@@ -31,6 +32,11 @@ public class TipoIncidencia {
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria_siseve", nullable = false, length = 50)
     private CategoriaSiseve categoriaSiseve;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gravedad_base", nullable = false, length = 20)
+    private Gravedad gravedadBase = Gravedad.LEVE;
 
     @Size(max = 255)
     @Column(name = "descripcion", length = 255)

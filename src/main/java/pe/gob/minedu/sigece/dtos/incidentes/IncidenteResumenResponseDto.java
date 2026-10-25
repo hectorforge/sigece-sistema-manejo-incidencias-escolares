@@ -14,7 +14,6 @@ public record IncidenteResumenResponseDto(
         String lugarOcurrencia,
         OffsetDateTime fechaOcurrencia,
         EstadoIncidente estado,
-        String responsableNombre,
-        Boolean reincidencia
+        String responsableNombre
 ) {
 }

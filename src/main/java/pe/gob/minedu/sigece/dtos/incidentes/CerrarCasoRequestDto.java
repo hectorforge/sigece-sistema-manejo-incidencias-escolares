@@ -8,6 +8,7 @@ public record CerrarCasoRequestDto(
         @Size(min = 10, message = "El acta de cierre debe tener al menos 10 caracteres")
         String actaCierre,
 
+        @NotBlank(message = "Las conclusiones finales son obligatorias")
         String conclusionesFinales
 ) {
 }

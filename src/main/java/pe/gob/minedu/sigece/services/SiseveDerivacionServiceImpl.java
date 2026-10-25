@@ -61,59 +61,91 @@ public class SiseveDerivacionServiceImpl implements ISiseveDerivacionService {
 
     @Override
     @Transactional
-    public SiseveDerivacionResponseDto derivarCaso(UUID incidenteId, SiseveDerivacionRequestDto dto, Long usuarioId) {
-        log.info("Registrando derivación a SíSeVe del caso ID: {} por usuario ID: {}", incidenteId, usuarioId);
+    public SiseveDerivacionResponseDto derivarCaso(
+            UUID incidenteId,
+            SiseveDerivacionRequestDto dto,
+            Long usuarioId) {
+
+        log.info(
+                "Registrando derivación a SíSeVe del caso ID: {} por usuario ID: {}",
+                incidenteId,
+                usuarioId
+        );
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND)
+                );
 
         Incidente incidente = incidenteRepository.findById(incidenteId)
-                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_NOT_FOUND));
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_NOT_FOUND)
+                );
 
         if (incidente.getEstado() == EstadoIncidente.CERRADO) {
-            throw new OperacionInvalidaException(ErrorCatalog.INCIDENTE_CERRADO);
+            throw new OperacionInvalidaException(
+                    ErrorCatalog.INCIDENTE_CERRADO
+            );
         }
 
+        // Validar el código antes de guardarlo
+        String codigoSiseve = dto.codigoSiseve();
+
+        if (codigoSiseve == null || codigoSiseve.isBlank()) {
+            throw new IllegalArgumentException(
+                    "El código de SíSeVe es obligatorio"
+            );
+        }
+
+        // Registrar los datos del reporte
         incidente.setReportadoSiseve(true);
-        incidente.setEstadoDerivacion(EstadoDerivacion.REGISTRADA);
-        incidente.setModoDerivacion(dto.modoDerivacion());
-        incidente.setCodigoSiseve(dto.codigoSiseve().trim());
+        incidente.setCodigoSiseve(codigoSiseve.trim());
         incidente.setFechaReporteSiseve(OffsetDateTime.now());
         incidente.setObservacionesSiseve(dto.observacionesSiseve());
         incidente.setDerivadoPor(usuario);
-        incidente.setEstado(EstadoIncidente.DERIVADO_SISEVE);
 
         Incidente guardado = incidenteRepository.save(incidente);
+
+        log.info(
+                "Reporte de SíSeVe registrado para el caso {}",
+                guardado.getCodigoCaso()
+        );
 
         return new SiseveDerivacionResponseDto(
                 guardado.getId(),
                 guardado.getCodigoCaso(),
                 guardado.getReportadoSiseve(),
-                guardado.getEstadoDerivacion(),
-                guardado.getModoDerivacion(),
                 guardado.getCodigoSiseve(),
                 guardado.getFechaReporteSiseve(),
                 guardado.getObservacionesSiseve(),
-                usuario.getNombres() + " " + usuario.getApellidos()
+                guardado.getDerivadoPor().getNombres()
+                        + " " + guardado.getDerivadoPor().getApellidos()
         );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SiseveDerivacionResponseDto consultarEstadoDerivacion(UUID incidenteId) {
-        return incidenteRepository.findById(incidenteId)
-                .map(i -> new SiseveDerivacionResponseDto(
-                        i.getId(),
-                        i.getCodigoCaso(),
-                        i.getReportadoSiseve(),
-                        i.getEstadoDerivacion(),
-                        i.getModoDerivacion(),
-                        i.getCodigoSiseve(),
-                        i.getFechaReporteSiseve(),
-                        i.getObservacionesSiseve(),
-                        i.getDerivadoPor() != null ? i.getDerivadoPor().getNombres() + " " + i.getDerivadoPor().getApellidos() : null
-                ))
-                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_NOT_FOUND));
+    public SiseveDerivacionResponseDto consultarEstadoDerivacion(
+            UUID incidenteId) {
+
+        Incidente incidente = incidenteRepository.findById(incidenteId)
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_NOT_FOUND)
+                );
+
+        Usuario derivadoPor = incidente.getDerivadoPor();
+
+        return new SiseveDerivacionResponseDto(
+                incidente.getId(),
+                incidente.getCodigoCaso(),
+                incidente.getReportadoSiseve(),
+                incidente.getCodigoSiseve(),
+                incidente.getFechaReporteSiseve(),
+                incidente.getObservacionesSiseve(),
+                derivadoPor != null
+                        ? derivadoPor.getNombres() + " " + derivadoPor.getApellidos()
+                        : null
+        );
     }
 
     @Override

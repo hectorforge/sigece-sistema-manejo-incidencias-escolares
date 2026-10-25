@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.gob.minedu.sigece.dtos.involucrados.*;
+import pe.gob.minedu.sigece.enums.EstadoIncidente;
 import pe.gob.minedu.sigece.enums.RolInvolucrado;
 import pe.gob.minedu.sigece.exceptions.OperacionInvalidaException;
 import pe.gob.minedu.sigece.exceptions.RecursoDuplicadoException;
@@ -75,11 +76,16 @@ public class IncidenteInvolucradoServiceImpl implements IIncidenteInvolucradoSer
 
     @Override
     @Transactional
-    public void removerInvolucrado(Long involucradoId, RemoverInvolucradoRequestDto dto, Long usuarioId) {
-        if (!involucradoRepository.existsById(involucradoId)) {
-            throw new RecursoNoEncontradoException(ErrorCatalog.INVOLUCRADO_NOT_FOUND);
+    public void removerInvolucrado(UUID incidenteId, Long involucradoId, RemoverInvolucradoRequestDto dto, Long usuarioId) {
+        IncidenteInvolucrado ii = involucradoRepository.findById(involucradoId)
+                .filter(x -> x.getIncidente().getId().equals(incidenteId))
+                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.INVOLUCRADO_NOT_FOUND));
+        if (ii.getIncidente().getEstado() == EstadoIncidente.CERRADO) {
+            throw new OperacionInvalidaException(ErrorCatalog.INCIDENTE_CERRADO);
         }
-        involucradoRepository.deleteById(involucradoId);
+        log.info("Involucrado {} retirado del caso {} por usuario {}. Motivo: {}",
+                involucradoId, incidenteId, usuarioId, dto.motivo());
+        involucradoRepository.delete(ii);
     }
 
     @Override

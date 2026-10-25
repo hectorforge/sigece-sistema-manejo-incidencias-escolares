@@ -2,6 +2,7 @@ package pe.gob.minedu.sigece.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import pe.gob.minedu.sigece.enums.RolNombre;
 
 import java.time.OffsetDateTime;
 
@@ -24,10 +26,10 @@ public class Rol {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(min = 3, max = 50)
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "nombre", nullable = false, unique = true, length = 50)
-    private String nombre;
+    private RolNombre nombre;
 
     @Size(max = 255)
     @Column(name = "descripcion", length = 255)

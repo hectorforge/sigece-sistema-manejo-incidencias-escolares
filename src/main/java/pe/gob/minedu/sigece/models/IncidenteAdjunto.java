@@ -12,7 +12,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "incidente_adjuntos")
+@Table(name = "incidente_adjuntos",
+        indexes = {
+                @Index(
+                        name = "idx_adjuntos_incidente",
+                        columnList = "incidente_id"
+                ),
+                @Index(
+                        name = "idx_adjuntos_accion",
+                        columnList = "accion_id"
+                )
+        }
+    )
 @Getter
 @Setter
 @NoArgsConstructor

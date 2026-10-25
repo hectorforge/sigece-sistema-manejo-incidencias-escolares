@@ -13,6 +13,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import pe.gob.minedu.sigece.enums.CanalNotificacion;
 import pe.gob.minedu.sigece.enums.EstadoEnvio;
+import pe.gob.minedu.sigece.enums.OrigenNotificacion;
+import pe.gob.minedu.sigece.enums.TipoNotificacion;
 
 import java.time.OffsetDateTime;
 
@@ -36,25 +38,55 @@ public class Notificacion {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "apoderado_id", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_notif_apoderado"))
-    private Apoderado apoderado;
+    @JoinColumn(
+            name = "estudiante_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_notif_estudiante")
+    )
+    private Estudiante estudiante;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "enviado_por_id", nullable = false,
+    @JoinColumn(name = "apoderado_id",
+            foreignKey = @ForeignKey(name = "fk_notif_apoderado"))
+    private Apoderado apoderado;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "accion_id",
+            foreignKey = @ForeignKey(name = "fk_notif_accion")
+    )
+    private AccionSeguimiento accion;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "plantilla_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_notif_plantilla")
+    )
+    private PlantillaMensaje plantilla;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "enviado_por_id",
             foreignKey = @ForeignKey(name = "fk_notif_enviado_por"))
     private Usuario enviadoPor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "alerta_id",
-            foreignKey = @ForeignKey(name = "fk_notif_alerta"))
-    private Alerta alerta;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_notificacion", nullable = false, length = 30)
+    private TipoNotificacion tipoNotificacion;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origen", nullable = false, length = 15)
+    private OrigenNotificacion origen = OrigenNotificacion.AUTOMATICA;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "canal", nullable = false, length = 20)
-    private CanalNotificacion canal;
+    private CanalNotificacion canal = CanalNotificacion.WHATSAPP;
 
     @Size(max = 150)
     @Column(name = "destino", length = 150)
@@ -62,7 +94,7 @@ public class Notificacion {
 
     @NotBlank
     @Size(max = 150)
-    @Column(name = "asunto", nullable = false, length = 150)
+    @Column(name = "asunto", length = 150)
     private String asunto;
 
     @NotBlank
@@ -71,6 +103,9 @@ public class Notificacion {
 
     @Column(name = "fecha_envio")
     private OffsetDateTime fechaEnvio;
+
+    @Column(name = "fecha_entrega")
+    private OffsetDateTime fechaEntrega;
 
     @NotNull
     @Enumerated(EnumType.STRING)

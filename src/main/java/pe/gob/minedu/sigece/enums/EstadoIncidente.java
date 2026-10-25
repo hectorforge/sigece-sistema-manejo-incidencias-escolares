@@ -9,6 +9,5 @@ public enum EstadoIncidente {
     EN_INVESTIGACION,
     EN_SEGUIMIENTO,
     RESUELTO,
-    DERIVADO_SISEVE,
     CERRADO
 }

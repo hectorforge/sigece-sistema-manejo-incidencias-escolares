@@ -7,14 +7,12 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record SiseveDerivacionResponseDto(
-        UUID incidenteId,
+        UUID id,
         String codigoCaso,
         Boolean reportadoSiseve,
-        EstadoDerivacion estadoDerivacion,
-        ModoDerivacion modoDerivacion,
         String codigoSiseve,
         OffsetDateTime fechaReporteSiseve,
         String observacionesSiseve,
-        String derivadoPorNombre
+        String derivadoPor
 ) {
 }

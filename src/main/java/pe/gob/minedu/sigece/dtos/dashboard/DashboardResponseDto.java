@@ -7,7 +7,6 @@ import java.util.Map;
 
 public record DashboardResponseDto(
         long totalIncidentes,
-        long totalReincidentes,
         long totalDerivadosSiseve,
         long totalCerrados,
         double porcentajeResolucion,

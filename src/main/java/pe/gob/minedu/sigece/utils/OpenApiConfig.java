@@ -27,6 +27,9 @@ public class OpenApiConfig {
 
     private static final String SECURITY_SCHEME_NAME = "Bearer Authentication";
 
+    //para pruebas
+    private static final String DEV_SCHEME_NAME = "UsuarioDev";
+
     @Value("${server.port:8080}")
     private String serverPort;
 
@@ -149,7 +152,9 @@ public class OpenApiConfig {
                                 .url("https://sigece.minedu.gob.pe/api/v1")
                                 .description("Ambiente de Producción")))
                 .components(construirComponentes())
-                .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
+                // para desarrollar con seguridad
+                // .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
+                .addSecurityItem(new SecurityRequirement().addList(DEV_SCHEME_NAME))
                 .tags(construirTags());
     }
 
@@ -166,7 +171,8 @@ public class OpenApiConfig {
         MediaType errorMediaType = new MediaType().schema(apiErrorSchema);
 
         return new Components()
-                .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme()
+                //Al agregar seguridad
+                /*.addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme()
                         .name(SECURITY_SCHEME_NAME)
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
@@ -175,7 +181,13 @@ public class OpenApiConfig {
                                 Autenticación estándar con Token JWT.
                                 Ingrese el token obtenido en `/api/auth/login`.
                                 Formato: `Bearer <token>` (Swagger UI inserta el prefijo automáticamente).
-                                """))
+                                """))*/
+                .addSecuritySchemes(DEV_SCHEME_NAME, new SecurityScheme()
+                        .type(SecurityScheme.Type.APIKEY)
+                        .in(SecurityScheme.In.HEADER)
+                        .name("X-Usuario-Id")
+                        .description("SOLO DESARROLLO: ID numérico del usuario que actúa (ej. 3). Se elimina al activar JWT."))
+                .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme())
                 .addResponses("400BadRequest", new ApiResponse()
                         .description("Petición inválida, error de validación de campos o regla de negocio no superada.")
                         .content(new Content().addMediaType("application/json", errorMediaType)))
