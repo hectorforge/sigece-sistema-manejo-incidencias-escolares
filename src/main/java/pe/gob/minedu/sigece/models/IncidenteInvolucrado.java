@@ -22,7 +22,18 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "incidente_involucrados",
         indexes = {
-                @Index(name = "idx_involucrados_incidente", columnList = "incidente_id")
+                @Index(
+                        name = "idx_involucrados_incidente",
+                        columnList = "incidente_id"
+                ),
+                @Index(
+                        name = "idx_involucrados_estudiante",
+                        columnList = "estudiante_id"
+                ),
+                @Index(
+                        name = "idx_involucrados_usuario",
+                        columnList = "usuario_id"
+                )
         })
 @Getter
 @Setter
@@ -32,6 +43,7 @@ public class IncidenteInvolucrado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
     @NotNull

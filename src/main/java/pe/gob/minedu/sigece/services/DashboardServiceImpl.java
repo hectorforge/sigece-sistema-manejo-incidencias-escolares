@@ -24,7 +24,6 @@ public class DashboardServiceImpl implements IDashboardService {
     public DashboardResponseDto obtenerIndicadores(DashboardFiltroRequestDto filtro) {
         long total = incidenteRepository.count();
         long cerrados = incidenteRepository.countByEstado(EstadoIncidente.CERRADO);
-        long reincidentes = incidenteRepository.countByReincidenciaTrue();
         long derivados = incidenteRepository.countByReportadoSiseveTrue();
 
         double porcentajeResolucion = total > 0 ? ((double) cerrados / total) * 100.0 : 0.0;
@@ -41,7 +40,6 @@ public class DashboardServiceImpl implements IDashboardService {
 
         return new DashboardResponseDto(
                 total,
-                reincidentes,
                 derivados,
                 cerrados,
                 Math.round(porcentajeResolucion * 10.0) / 10.0,

@@ -16,7 +16,22 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "acciones_seguimiento")
+@Table(name = "acciones_seguimiento",
+        indexes = {
+                @Index(
+                        name = "idx_acciones_incidente",
+                        columnList = "incidente_id"
+                ),
+                @Index(
+                        name = "idx_acciones_usuario",
+                        columnList = "usuario_id"
+                ),
+                @Index(
+                        name = "idx_acciones_estado",
+                        columnList = "estado_accion"
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +40,7 @@ public class AccionSeguimiento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
     @NotNull
@@ -51,6 +67,9 @@ public class AccionSeguimiento {
     @NotNull
     @Column(name = "fecha_accion", nullable = false)
     private OffsetDateTime fechaAccion = OffsetDateTime.now();
+
+    @Column(name = "fecha_programada")
+    private OffsetDateTime fechaProgramada;
 
     @Column(name = "fecha_proxima_revision")
     private LocalDate fechaProximaRevision;

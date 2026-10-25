@@ -8,12 +8,10 @@ import pe.gob.minedu.sigece.dtos.notificaciones.*;
 import pe.gob.minedu.sigece.enums.EstadoEnvio;
 import pe.gob.minedu.sigece.exceptions.RecursoNoEncontradoException;
 import pe.gob.minedu.sigece.mappers.NotificacionMapper;
-import pe.gob.minedu.sigece.models.Alerta;
 import pe.gob.minedu.sigece.models.Apoderado;
 import pe.gob.minedu.sigece.models.Incidente;
 import pe.gob.minedu.sigece.models.Notificacion;
 import pe.gob.minedu.sigece.models.Usuario;
-import pe.gob.minedu.sigece.persistence.repositories.IAlertaRepository;
 import pe.gob.minedu.sigece.persistence.repositories.IApoderadoRepository;
 import pe.gob.minedu.sigece.persistence.repositories.IIncidenteRepository;
 import pe.gob.minedu.sigece.persistence.repositories.INotificacionRepository;
@@ -35,7 +33,6 @@ public class NotificacionServiceImpl implements INotificacionService {
     private final IIncidenteRepository incidenteRepository;
     private final IApoderadoRepository apoderadoRepository;
     private final IUsuarioRepository usuarioRepository;
-    private final IAlertaRepository alertaRepository;
     private final INotificacionSenderPort notificacionSender;
 
     @Override
@@ -52,10 +49,6 @@ public class NotificacionServiceImpl implements INotificacionService {
         Usuario remitente = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
 
-        Alerta alerta = dto.alertaId() != null
-                ? alertaRepository.findById(dto.alertaId()).orElse(null)
-                : null;
-
         String destino = dto.destino() != null ? dto.destino().trim() : apoderado.getTelefono();
 
         var resultadoPort = notificacionSender.enviar(dto.canal(), destino, dto.asunto(), dto.mensaje());
@@ -64,7 +57,6 @@ public class NotificacionServiceImpl implements INotificacionService {
         notif.setIncidente(incidente);
         notif.setApoderado(apoderado);
         notif.setEnviadoPor(remitente);
-        notif.setAlerta(alerta);
         notif.setCanal(dto.canal());
         notif.setDestino(destino);
         notif.setAsunto(dto.asunto().trim());

@@ -183,6 +183,30 @@ public enum ErrorCatalog {
     ),
 
     /**
+     * Asignación de aulas a tutores
+     */
+    TUTOR_AULA_NOT_FOUND(
+            "ERR_TAU_001",
+            "Asignación de aula no encontrada",
+            "Verifique el identificador de la asignación de aula.",
+            HttpStatus.NOT_FOUND
+    ),
+
+    TUTOR_AULA_DUPLICADA(
+            "ERR_TAU_002",
+            "El tutor ya tiene asignada esta aula en el año escolar",
+            "Verifique el nivel, grado, sección y año escolar.",
+            HttpStatus.CONFLICT
+    ),
+
+    TUTOR_AULA_ROL_INVALIDO(
+            "ERR_TAU_003",
+            "El usuario no tiene el rol de tutor",
+            "Solo se pueden asignar aulas a usuarios con rol TUTOR.",
+            HttpStatus.UNPROCESSABLE_ENTITY
+    ),
+
+    /**
      * Tipos de incidencia
      */
     TIPO_INCIDENCIA_NOT_FOUND(

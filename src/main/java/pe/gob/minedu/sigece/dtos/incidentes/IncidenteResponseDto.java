@@ -1,9 +1,6 @@
 package pe.gob.minedu.sigece.dtos.incidentes;
 
-import pe.gob.minedu.sigece.enums.EstadoDerivacion;
-import pe.gob.minedu.sigece.enums.EstadoIncidente;
-import pe.gob.minedu.sigece.enums.Gravedad;
-import pe.gob.minedu.sigece.enums.ModoDerivacion;
+import pe.gob.minedu.sigece.enums.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -16,21 +13,26 @@ public record IncidenteResponseDto(
         Gravedad gravedad,
         String descripcion,
         String lugarOcurrencia,
+        MedioOcurrencia medioOcurrencia,
         OffsetDateTime fechaOcurrencia,
         OffsetDateTime fechaRegistro,
         EstadoIncidente estado,
+        Boolean notificarApoderado,
         Long reportadoPorId,
         String reportadoPorNombre,
         Long responsableActualId,
         String responsableActualNombre,
-        Boolean reincidencia,
+        OffsetDateTime fechaResolucion,
+        String resueltoPorNombre,
         String actaCierre,
+        String conclusionesFinales,
         OffsetDateTime fechaCierre,
         String cerradoPorNombre,
         Boolean reportadoSiseve,
-        EstadoDerivacion estadoDerivacion,
-        ModoDerivacion modoDerivacion,
+        OffsetDateTime fechaReporteSiseve,
         String codigoSiseve,
+        String observacionesSiseve,
+        String derivadoPorNombre,
         OffsetDateTime createdAt
 ) {
 }

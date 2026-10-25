@@ -1,19 +1,7 @@
 package pe.gob.minedu.sigece.usecases;
 
 import pe.gob.minedu.sigece.dtos.common.PagedResponse;
-import pe.gob.minedu.sigece.dtos.incidentes.AsignarResponsableRequestDto;
-import pe.gob.minedu.sigece.dtos.incidentes.CambiarEstadoRequestDto;
-import pe.gob.minedu.sigece.dtos.incidentes.CasoPendienteResponseDto;
-import pe.gob.minedu.sigece.dtos.incidentes.CerrarCasoRequestDto;
-import pe.gob.minedu.sigece.dtos.incidentes.CierreChecklistResponseDto;
-import pe.gob.minedu.sigece.dtos.incidentes.ClasificarGravedadRequestDto;
-import pe.gob.minedu.sigece.dtos.incidentes.IncidenteExpedienteResponseDto;
-import pe.gob.minedu.sigece.dtos.incidentes.IncidenteFiltroRequestDto;
-import pe.gob.minedu.sigece.dtos.incidentes.IncidenteRequestDto;
-import pe.gob.minedu.sigece.dtos.incidentes.IncidenteResponseDto;
-import pe.gob.minedu.sigece.dtos.incidentes.IncidenteResumenResponseDto;
-import pe.gob.minedu.sigece.dtos.incidentes.ReincidenciaRequestDto;
-import pe.gob.minedu.sigece.dtos.incidentes.ReincidenciaResponseDto;
+import pe.gob.minedu.sigece.dtos.incidentes.*;
 import pe.gob.minedu.sigece.enums.EstadoIncidente;
 
 import java.util.List;
@@ -164,4 +152,10 @@ public interface IIncidenteService {
      * @return Código único correlativo generado.
      */
     String generarCodigoCaso();
+
+    /** Resuelve el caso. Rol: PSICOLOGO. Exige estado EN_SEGUIMIENTO. */
+    IncidenteResponseDto resolverIncidente(UUID incidenteId, ResolverIncidenteRequestDto dto, Long usuarioId);
+
+    /** Registra manualmente la derivación a SíSeVe (CU20/CU21). Rol: ADMINISTRADOR. */
+    IncidenteResponseDto registrarDerivacionSiseve(UUID incidenteId, DerivacionSiseveRequestDto dto, Long usuarioId);
 }

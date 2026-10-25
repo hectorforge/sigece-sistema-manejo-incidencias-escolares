@@ -2,7 +2,6 @@ package pe.gob.minedu.sigece.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,28 +13,34 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "parametros_sistema")
+@Table(name = "plantillas_mensaje")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParametroSistema {
+public class PlantillaMensaje {
 
     @Id
-    @NotBlank
-    @Size(max = 60)
-    @Pattern(regexp = "^[A-Z0-9_]+$")
-    @Column(name = "clave", nullable = false, length = 60)
-    private String clave;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
+    private Long id;
 
     @NotBlank
-    @Size(max = 255)
-    @Column(name = "valor", nullable = false, length = 255)
-    private String valor;
+    @Size(max = 30)
+    @Column(name = "codigo", nullable = false, unique = true, length = 30)
+    private String codigo;
 
-    @Size(max = 255)
-    @Column(name = "descripcion", length = 255)
-    private String descripcion;
+    @NotBlank
+    @Size(max = 100)
+    @Column(name = "nombre_whatsapp", nullable = false, length = 100)
+    private String nombreWhatsapp;
+
+    @NotBlank
+    @Column(name = "contenido", nullable = false, columnDefinition = "TEXT")
+    private String contenido;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

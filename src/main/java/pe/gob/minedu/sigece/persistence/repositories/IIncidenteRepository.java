@@ -40,6 +40,13 @@ public interface IIncidenteRepository extends JpaRepository<Incidente, UUID>, Jp
             """)
     int countReincidenciasPorEstudiante(@Param("estudianteId") Long estudianteId, @Param("fechaDesde") OffsetDateTime fechaDesde);
 
+    @Query(value = """
+        INSERT INTO contadores_incidente (anio, ultimo_numero) VALUES (:anio, 1)
+        ON CONFLICT (anio) DO UPDATE SET ultimo_numero = contadores_incidente.ultimo_numero + 1
+        RETURNING ultimo_numero
+        """, nativeQuery = true)
+    int siguienteCorrelativo(@Param("anio") int anio);
+
     @Query("""
             SELECT i FROM Incidente i
             WHERE i.gravedad IN (pe.gob.minedu.sigece.enums.Gravedad.GRAVE, pe.gob.minedu.sigece.enums.Gravedad.MUY_GRAVE)
@@ -49,6 +56,5 @@ public interface IIncidenteRepository extends JpaRepository<Incidente, UUID>, Jp
     List<Incidente> findPendientesDeDerivacionSiseve();
 
     long countByEstado(EstadoIncidente estado);
-    long countByReincidenciaTrue();
     long countByReportadoSiseveTrue();
 }
