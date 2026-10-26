@@ -1,16 +1,16 @@
 -- =====================================================================================
--- SIGECE - BASE DE DATOS (PostgreSQL)
--- Script completo que levanta todo el esquema inicial
---base de datos actualizada 23/10/2026
+-- SIGECE - V3
+-- Autores : Hector Julio Hernandez Tacas, Alex Ayamamani
+-- Ultima actualizacion: 25/10/2026
 -- =====================================================================================
-
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- =====================================================================================
 -- 1. ROLES
--- No se cambió nada
--- Descripción: catálogo de roles del sistema (ADMINISTRADOR, TUTOR, PSICOLOGO).
---              Respalda CU01 (registrar usuarios y roles) y el control de acceso por rol.
+-- Descripción: Catálogo maestro de perfiles de usuario del sistema (ADMINISTRADOR,
+--              TUTOR, PSICOLOGO). Define los niveles de autorización y delimita las
+--              operaciones y módulos accesibles para cada actor. Respalda CU01
+--              (registrar usuarios y roles) y el control de acceso basado en roles.
 -- =====================================================================================
 CREATE TABLE roles (
     id              BIGSERIAL PRIMARY KEY,
@@ -22,11 +22,14 @@ CREATE TABLE roles (
     CONSTRAINT chk_roles_nombre_formato CHECK (length(trim(nombre)) >= 3)
 );
 
+
 -- =====================================================================================
 -- 2. USUARIOS
--- Descripción: personas que usan el sistema (administrador, tutor, psicólogo) con sus
---              credenciales. El campo "activo" permite cambiar el estado de un usuario.
---              Respalda CU01, CU02 y CU03.
+-- Descripción: Repositorio central de cuentas del personal institucional autorizado
+--              (administrador, tutor, psicólogo) con sus credenciales seguras, datos
+--              de contacto, rol y estado operativo. Controla la autenticación, los
+--              bloqueos por intentos fallidos y la trazabilidad de auditoría. Respalda
+--              CU01 (registrar usuarios), CU02 (consultar) y CU03 (cambiar estado).
 -- =====================================================================================
 CREATE TABLE usuarios (
     id                          BIGSERIAL PRIMARY KEY,
@@ -52,17 +55,17 @@ CREATE TABLE usuarios (
     CONSTRAINT chk_usuarios_correo CHECK (correo ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
     CONSTRAINT chk_usuarios_intentos CHECK (intentos_fallidos >= 0)
 );
-
 CREATE INDEX idx_usuarios_role_id ON usuarios(role_id);
 CREATE INDEX idx_usuarios_correo  ON usuarios(correo);
 CREATE INDEX idx_usuarios_activo  ON usuarios(activo);
 
+
 -- =====================================================================================
 -- 3. TUTOR_AULA
--- Descripción: asigna a cada tutor los grados y secciones que tiene a cargo por año
---              escolar. Permite aplicar la regla RN04: el tutor solo consulta a los
---              estudiantes de sus grados o secciones (CU05).
--- Nota: que el usuario tenga rol TUTOR se valida en la aplicación.
+-- Descripción: Tabla asociativa que asigna a cada docente con rol TUTOR las aulas
+--              (nivel, grado y sección) a su cargo por cada año escolar. Aplica la
+--              regla RN04: el tutor únicamente consulta estudiantes e incidencias
+--              pertenecientes a sus aulas asignadas. Respalda CU05 y CU11.
 -- =====================================================================================
 CREATE TABLE tutor_aula (
     id                  BIGSERIAL PRIMARY KEY,
@@ -79,14 +82,16 @@ CREATE TABLE tutor_aula (
     CONSTRAINT chk_tutor_aula_anio CHECK (anio_escolar BETWEEN 2000 AND 2100),
     CONSTRAINT uq_tutor_aula UNIQUE (usuario_id, nivel, grado, seccion, anio_escolar)
 );
-
 CREATE INDEX idx_tutor_aula_usuario ON tutor_aula(usuario_id) WHERE activo = TRUE;
 CREATE INDEX idx_tutor_aula_aula    ON tutor_aula(nivel, grado, seccion);
 
+
 -- =====================================================================================
 -- 4. ESTUDIANTES
--- Descripción: estudiantes de la institución con su nivel, grado y sección.
---              Respalda CU04 (registrar) y CU05 (consultar).
+-- Descripción: Padrón de alumnos matriculados en la institución educativa con su
+--              código oficial SIAGIE, datos personales y ubicación escolar (nivel,
+--              grado y sección). Constituye la entidad base para el seguimiento
+--              longitudinal de casos. Respalda CU04 (registrar) y CU05 (consultar).
 -- =====================================================================================
 CREATE TABLE estudiantes (
     id                  BIGSERIAL PRIMARY KEY,
@@ -104,16 +109,17 @@ CREATE TABLE estudiantes (
     CONSTRAINT chk_estudiantes_nivel CHECK (nivel IN ('INICIAL', 'PRIMARIA', 'SECUNDARIA')),
     CONSTRAINT chk_estudiantes_fecha_nac CHECK (fecha_nacimiento < CURRENT_DATE)
 );
-
 CREATE INDEX idx_estudiantes_grado_seccion ON estudiantes(grado, seccion);
 CREATE INDEX idx_estudiantes_nivel         ON estudiantes(nivel);
 CREATE INDEX idx_estudiantes_codigo_siagie ON estudiantes(codigo_siagie);
 
+
 -- =====================================================================================
 -- 5. APODERADOS
--- Descripción: apoderados o padres de familia con su teléfono, que es el destino de las
---              notificaciones por WhatsApp. No son usuarios del sistema.
---              Respalda CU06 (registrar) y CU07 (consultar).
+-- Descripción: Directorio de padres de familia o apoderados legales de los estudiantes.
+--              Registra sus documentos de identidad y números telefónicos como canal
+--              destino de las comunicaciones oficiales por WhatsApp. No son usuarios
+--              directos del sistema. Respalda CU06 (registrar) y CU07 (consultar).
 -- =====================================================================================
 CREATE TABLE apoderados (
     id                  BIGSERIAL PRIMARY KEY,
@@ -129,13 +135,15 @@ CREATE TABLE apoderados (
     CONSTRAINT chk_apoderados_tipo_doc CHECK (tipo_documento IN ('DNI', 'CE', 'PASAPORTE')),
     CONSTRAINT chk_apoderados_num_doc CHECK (length(trim(numero_documento)) >= 8)
 );
-
 CREATE INDEX idx_apoderados_documento ON apoderados(numero_documento);
+
 
 -- =====================================================================================
 -- 6. ESTUDIANTE_APODERADO
--- Descripción: relación entre estudiantes y apoderados, con el parentesco y el contacto
---              principal al que se envían las notificaciones. Respalda CU06 y CU07.
+-- Descripción: Tabla asociativa que vincula a los estudiantes con sus apoderados,
+--              especificando el parentesco legal y designando al contacto principal
+--              exclusivo para la entrega automatizada de notificaciones y citaciones.
+--              Respalda CU06 (registrar apoderados), CU07 y CU17 (enviar notificación).
 -- =====================================================================================
 CREATE TABLE estudiante_apoderado (
     id                      BIGSERIAL PRIMARY KEY,
@@ -158,11 +166,13 @@ CREATE UNIQUE INDEX uq_est_apod_contacto_principal
     ON estudiante_apoderado (estudiante_id)
     WHERE es_contacto_principal = TRUE;
 
+
 -- =====================================================================================
 -- 7. TIPOS_INCIDENCIA
--- Descripción: catálogo parametrizable de tipos de incidencia con su nivel de gravedad
---              base (LEVE, GRAVE o MUY_GRAVE). La gravedad determina si se notifica al
---              apoderado (RN01). Respalda CU08 (registrar) y CU09 (consultar).
+-- Descripción: Catálogo maestro y parametrizable de faltas a la convivencia escolar,
+--              homologado con la taxonomía oficial del portal SíseVe y su nivel de
+--              gravedad base (LEVE, MODERADO, GRAVE, MUY_GRAVE). Aplica la regla RN01
+--              para determinar la obligatoriedad de la notificación. Respalda CU08 y CU09.
 -- =====================================================================================
 CREATE TABLE tipos_incidencia (
     id                  BIGSERIAL PRIMARY KEY,
@@ -175,25 +185,16 @@ CREATE TABLE tipos_incidencia (
     CONSTRAINT chk_tipos_incidencia_gravedad CHECK (gravedad_base IN ('LEVE', 'MODERADO', 'GRAVE', 'MUY_GRAVE'))
 );
 
+
 -- =====================================================================================
 -- 8. INCIDENTES
---   Campos agregados : medio_ocurrencia, notificar_apoderado, fecha_resolucion,
---                      resuelto_por_id
---   Campos quitados  : reincidencia, estado_derivacion, modo_derivacion,
---                      error_integracion_siseve
---   Campos cambiados : responsable_actual_id (ahora NOT NULL y FK con ON DELETE RESTRICT);
---                      gravedad (se quita 'MODERADA'); estado (se quita 'DERIVADO_SISEVE')
---   Constraints quitados  : chk_incidentes_estado_derivacion, chk_incidentes_modo_derivacion,
---                           chk_incidentes_derivacion_fallida, chk_incidentes_estado_derivado
---   Constraints cambiados : chk_incidentes_derivacion_coherente (ahora solo registro manual)
---   Constraints agregados : chk_incidentes_medio, chk_incidentes_resolucion_completa,
---                           chk_incidentes_fecha_resolucion
---   Índices quitados : idx_incidentes_reincidencia, idx_incidentes_derivacion_activa
--- Descripción: expediente central de la incidencia. Concentra el registro (CU10), el
---              responsable obligatorio (CU13), el estado RESUELTO por el psicólogo y
---              CERRADO por el administrador con su acta (CU19, RN06) y el registro
---              manual de la derivación a SíseVe (CU20, CU21). La reincidencia se obtiene
---              consultando el historial del estudiante (CU16), no con un campo.
+-- Descripción: Expediente digital central de cada hecho o conflicto de convivencia.
+--              Registra el código correlativo formal, gravedad, descripción, lugar,
+--              medio de ocurrencia (presencial o digital), usuario reportante y
+--              responsable asignado. Gestiona el ciclo de vida del caso, la resolución
+--              técnica por psicología, el cierre formal administrativo con acta (RN06)
+--              y las derivaciones a SíseVe. Respalda CU10, CU11, CU13, CU19, CU20, CU21,
+--              las reglas RN01, RN03, RN06, RN07 y los objetivos ON01 y ON03.
 -- =====================================================================================
 CREATE TABLE incidentes (
     id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -262,7 +263,6 @@ CREATE TABLE incidentes (
             AND codigo_siseve IS NOT NULL
             AND derivado_por_id IS NOT NULL))
 );
-
 CREATE INDEX idx_incidentes_estado            ON incidentes(estado);
 CREATE INDEX idx_incidentes_tipo              ON incidentes(tipo_incidencia_id);
 CREATE INDEX idx_incidentes_fecha_ocurrencia  ON incidentes(fecha_ocurrencia);
@@ -272,6 +272,13 @@ CREATE INDEX idx_incidentes_reportado_por     ON incidentes(reportado_por_id);
 CREATE INDEX idx_incidentes_responsable       ON incidentes(responsable_actual_id);
 CREATE INDEX idx_incidentes_siseve            ON incidentes(reportado_siseve);
 
+-- =====================================================================================
+-- 9. CONTADORES_INCIDENTE
+-- Descripción: Mecanismo de persistencia de control transaccional para la generación
+--              atómica de la secuencia numérica correlativa anual de los códigos de
+--              caso (INC-YYYY-NNNNNN). Previene condiciones de carrera y claves
+--              duplicadas ante registros concurrentes. Da soporte a CU10.
+-- =====================================================================================
 CREATE TABLE contadores_incidente (
     anio            INTEGER PRIMARY KEY,
     ultimo_numero   INTEGER NOT NULL DEFAULT 0,
@@ -280,9 +287,12 @@ CREATE TABLE contadores_incidente (
 
 
 -- =====================================================================================
--- 9. INCIDENTE_INVOLUCRADOS
--- Descripción: estudiantes (o usuarios) involucrados en una incidencia con su rol
---              (VICTIMA, AGRESOR, TESTIGO). Respalda CU12 (registrar involucrados).
+-- 10. INCIDENTE_INVOLUCRADOS
+-- Descripción: Registro de participantes implicados en un incidente (estudiantes o
+--              usuarios institucionales) con su rol específico en el suceso (VICTIMA,
+--              AGRESOR, TESTIGO). Aplica la regla RN07 de obligatoriedad de actores al
+--              aperturar el expediente y permite el análisis de reincidencias (CU16).
+--              Respalda CU12 (registrar involucrados) y CU16 (consultar historial).
 -- =====================================================================================
 CREATE TABLE incidente_involucrados (
     id                  BIGSERIAL PRIMARY KEY,
@@ -302,31 +312,24 @@ CREATE TABLE incidente_involucrados (
         OR
         (estudiante_id IS NULL AND usuario_id IS NOT NULL))
 );
-
 CREATE INDEX idx_involucrados_incidente  ON incidente_involucrados(incidente_id);
 CREATE INDEX idx_involucrados_estudiante ON incidente_involucrados(estudiante_id);
 CREATE INDEX idx_involucrados_usuario    ON incidente_involucrados(usuario_id);
-
 CREATE UNIQUE INDEX uq_involucrado_estudiante
     ON incidente_involucrados (incidente_id, estudiante_id, rol_involucrado)
     WHERE estudiante_id IS NOT NULL;
-
 CREATE UNIQUE INDEX uq_involucrado_usuario
     ON incidente_involucrados (incidente_id, usuario_id, rol_involucrado)
     WHERE usuario_id IS NOT NULL;
 
+
 -- =====================================================================================
--- 10. ACCIONES_SEGUIMIENTO
---   Campos agregados : fecha_programada (fecha de la cita o entrevista)
---   Campos quitados  : ninguno
---   Campos cambiados : tipo_accion (se agregan 'CITACION_APODERADO' y 'APUNTE_INTERNO')
---   Constraints cambiados : chk_acciones_tipo
---   Constraints agregados : chk_acciones_fecha_programada
--- Descripción: acciones que registra el psicólogo en el seguimiento de una incidencia.
---              Regla RN02: solo las citaciones y entrevistas (CITACION_APODERADO,
---              ENTREVISTA_ESTUDIANTE, ENTREVISTA_PADRES) disparan notificación
---              automática al apoderado; APUNTE_INTERNO y OTRO no notifican.
---              Respalda CU15 (registrar acción) y CU16 (expediente e historial).
+-- 11. ACCIONES_SEGUIMIENTO
+-- Descripción: Bitácora de intervenciones pedagógicas, disciplinarias y psicológicas
+--              registradas sobre una incidencia. Aplica la regla RN02: citaciones y
+--              entrevistas activan notificación automática al apoderado, mientras que
+--              apuntes internos no notifican. Constituye el requisito previo para que
+--              el psicólogo marque el caso como resuelto. Respalda CU15, CU16 y RN06.
 -- =====================================================================================
 CREATE TABLE acciones_seguimiento (
     id                          BIGSERIAL PRIMARY KEY,
@@ -358,16 +361,17 @@ CREATE TABLE acciones_seguimiento (
 CREATE INDEX idx_acciones_incidente ON acciones_seguimiento(incidente_id);
 CREATE INDEX idx_acciones_usuario   ON acciones_seguimiento(usuario_id);
 CREATE INDEX idx_acciones_estado    ON acciones_seguimiento(estado_accion);
-
 CREATE INDEX idx_acciones_revision_pendiente
     ON acciones_seguimiento(fecha_proxima_revision)
     WHERE estado_accion <> 'COMPLETADA' AND fecha_proxima_revision IS NOT NULL;
 
+
 -- =====================================================================================
--- 11. INCIDENTE_ADJUNTOS
--- Descripción: evidencias (fotos, actas, documentos) adjuntas a una incidencia o a una
---              acción de seguimiento, con hash SHA-256 y eliminación lógica.
---              Respalda CU14 (adjuntar evidencia).
+-- 12. INCIDENTE_ADJUNTOS
+-- Descripción: Repositorio de evidencias digitales (fotografías, documentos, audios o
+--              actas escaneadas) vinculadas a un caso o a una acción de seguimiento.
+--              Almacena el hash criptográfico SHA-256 para preservar la cadena de
+--              custodia y soporta borrado lógico auditable. Respalda CU14 (evidencias).
 -- =====================================================================================
 CREATE TABLE incidente_adjuntos (
     id                      BIGSERIAL PRIMARY KEY,
@@ -412,16 +416,17 @@ CREATE TABLE incidente_adjuntos (
 CREATE INDEX idx_adjuntos_incidente ON incidente_adjuntos(incidente_id);
 CREATE INDEX idx_adjuntos_accion    ON incidente_adjuntos(accion_id);
 CREATE INDEX idx_adjuntos_activo    ON incidente_adjuntos(incidente_id) WHERE activo = TRUE;
-
 CREATE UNIQUE INDEX uq_adjuntos_incidente_hash
     ON incidente_adjuntos (incidente_id, hash_sha256)
     WHERE activo = TRUE;
 
+
 -- =====================================================================================
--- 12. PLANTILLAS_MENSAJE
--- Descripción: plantillas de los mensajes de WhatsApp que envía el sistema: aviso de
---              incidencia, citación, entrevista y cierre de caso. La plantilla de
---              CIERRE_CASO se envía siempre al cerrar un caso (RN03). Respalda CU17.
+-- 13. PLANTILLAS_MENSAJE
+-- Descripción: Catálogo de plantillas oficiales de mensajería aprobadas para el canal
+--              de WhatsApp Business Platform (AVISO_INCIDENCIA, CITACION, ENTREVISTA,
+--              CIERRE_CASO). Garantiza redacciones estandarizadas y la protección de
+--              datos sensibles de menores. Respalda CU17 y la regla RN03.
 -- =====================================================================================
 CREATE TABLE plantillas_mensaje (
     id                  BIGSERIAL PRIMARY KEY,
@@ -437,23 +442,12 @@ CREATE TABLE plantillas_mensaje (
 );
 
 -- =====================================================================================
--- 13. NOTIFICACIONES
---   Campos agregados : accion_id, plantilla_id, tipo_notificacion, origen
---   Campos quitados  : alerta_id
---   Campos cambiados : enviado_por_id (ahora permite NULL: envío automático);
---                      asunto (ahora permite NULL: WhatsApp usa plantillas);
---                      canal (solo 'WHATSAPP', valor por defecto)
---   Constraints quitados  : fk_notif_alerta
---   Constraints cambiados : chk_notif_canal
---   Constraints agregados : fk_notif_accion, fk_notif_plantilla, chk_notif_tipo,
---                           chk_notif_origen, chk_notif_accion_requerida,
---                           chk_notif_manual_usuario
---   Índices quitados : idx_notif_alerta
---   Índices agregados: idx_notif_accion, idx_notif_tipo
--- Descripción: bitácora de los mensajes enviados a los apoderados por el Servicio de
---              Mensajería. Registra el tipo, el origen (AUTOMATICA o MANUAL), la
---              plantilla, el estado de entrega y las fechas, lo que permite medir el
---              ON02 (envío en menos de 5 minutos). Respalda CU17 y CU18.
+-- 14. NOTIFICACIONES
+-- Descripción: Bitácora transaccional y de auditoría de los mensajes enviados a los
+--              apoderados por el Servicio de Mensajería. Registra estudiante, apoderado,
+--              plantilla, canal (WHATSAPP), contenido, marcas de tiempo de envío y
+--              entrega, estados (PENDIENTE, ENVIADO, ENTREGADO, LEIDO, FALLIDO) y fallos.
+--              Respalda CU17, CU18 y sustenta la medición del objetivo ON02 (< 5 min).
 -- =====================================================================================
 CREATE TABLE notificaciones (
     id                      BIGSERIAL PRIMARY KEY,
@@ -498,7 +492,6 @@ CREATE TABLE notificaciones (
                                     tipo_notificacion NOT IN ('CITACION', 'ENTREVISTA') OR accion_id IS NOT NULL),
                                 CONSTRAINT chk_notif_manual_usuario CHECK (origen <> 'MANUAL' OR enviado_por_id IS NOT NULL)
 );
-
 CREATE INDEX idx_notif_incidente ON notificaciones(incidente_id);
 CREATE INDEX idx_notif_estudiante ON notificaciones(estudiante_id);
 CREATE INDEX idx_notif_apoderado ON notificaciones(apoderado_id);
@@ -509,7 +502,12 @@ CREATE INDEX idx_notif_created   ON notificaciones(created_at DESC);
 
 
 -- =====================================================================================
--- 14. REPORTES_GENERADOS
+-- 15. REPORTES_GENERADOS
+-- Descripción: Repositorio histórico y de control de los informes estadísticos y de
+--              indicadores solicitados por la dirección y administración. Almacena
+--              filtros aplicados (JSONB), resultados de indicadores calculados (JSONB),
+--              formato (PDF o EXCEL) y URL del archivo. Respalda CU22 y la auditoría
+--              del cumplimiento del objetivo ON03 (informes emitidos en < 48 horas).
 -- =====================================================================================
 CREATE TABLE reportes_generados (
     id                  BIGSERIAL PRIMARY KEY,
@@ -548,93 +546,6 @@ CREATE TABLE reportes_generados (
             'INDICADORES_ON03'
         ))
 );
-
 CREATE INDEX idx_reportes_usuario ON reportes_generados(generado_por_id);
 CREATE INDEX idx_reportes_fecha   ON reportes_generados(fecha_generacion DESC);
 CREATE INDEX idx_reportes_tipo    ON reportes_generados(tipo_reporte);
-
--- =====================================================================================
--- VISTAS DE INDICADORES
--- =====================================================================================
-
--- ON01: registro completo
-CREATE VIEW vw_on01_registro_completo AS
-SELECT
-    i.id AS incidente_id,
-    i.codigo_caso,
-    i.fecha_registro,
-    i.tipo_incidencia_id,
-    i.gravedad,
-    EXISTS (
-        SELECT 1
-        FROM incidente_involucrados iv
-        WHERE iv.incidente_id = i.id
-    ) AS tiene_involucrados,
-    EXISTS (
-        SELECT 1
-        FROM incidente_adjuntos a
-        WHERE a.incidente_id = i.id
-          AND a.activo = TRUE
-    ) AS tiene_evidencia,
-    (
-        i.tipo_incidencia_id IS NOT NULL
-        AND i.gravedad IS NOT NULL
-        AND EXISTS (
-            SELECT 1
-            FROM incidente_involucrados iv
-            WHERE iv.incidente_id = i.id
-        )
-    ) AS cumple
-FROM incidentes i;
-
-
--- ON02: notificaciones enviadas oportunamente
--- El denominador incluye todas las notificaciones registradas.
--- PENDIENTE y FALLIDO cuentan como no cumplen.
-CREATE VIEW vw_on02_notificaciones_oportunas AS
-SELECT
-    n.id AS notificacion_id,
-    n.incidente_id,
-    n.tipo_notificacion,
-    n.estado_envio,
-    n.created_at AS fecha_solicitud,
-    n.fecha_envio,
-    n.fecha_entrega,
-    EXTRACT(EPOCH FROM (n.fecha_envio - n.created_at)) AS segundos_hasta_envio,
-    (
-        n.estado_envio IN ('ENVIADO', 'ENTREGADO', 'LEIDO')
-        AND n.fecha_envio IS NOT NULL
-        AND n.fecha_envio - n.created_at <= INTERVAL '5 minutes'
-    ) AS cumple
-FROM notificaciones n;
-
--- ON03a: incidencias resueltas con acta de cierre
-CREATE VIEW vw_on03_acta_cierre AS
-SELECT
-    i.id AS incidente_id,
-    i.codigo_caso,
-    i.fecha_resolucion,
-    i.fecha_cierre,
-    i.estado,
-    (
-        i.estado = 'CERRADO'
-        AND i.acta_cierre IS NOT NULL
-    ) AS cumple
-FROM incidentes i
-WHERE i.fecha_resolucion IS NOT NULL;
-
--- ON03b: reportes de indicadores generados en menos de 48 horas
-CREATE VIEW vw_on03_reporte_en_plazo AS
-SELECT
-    i.id AS incidente_id,
-    i.codigo_caso,
-    i.fecha_resolucion,
-    EXISTS (
-        SELECT 1
-        FROM reportes_generados r
-        WHERE r.tipo_reporte = 'INDICADORES_ON03'
-          AND r.fecha_generacion >= i.fecha_resolucion
-          AND r.fecha_generacion < i.fecha_resolucion + INTERVAL '48 hours'
-    ) AS cumple
-FROM incidentes i
-WHERE i.fecha_resolucion IS NOT NULL;
