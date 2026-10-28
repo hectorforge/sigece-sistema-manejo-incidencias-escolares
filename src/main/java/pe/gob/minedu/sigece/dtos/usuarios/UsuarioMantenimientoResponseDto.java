@@ -2,7 +2,7 @@ package pe.gob.minedu.sigece.dtos.usuarios;
 
 import java.time.OffsetDateTime;
 
-public record UsuarioResponseDto(
+public record UsuarioMantenimientoResponseDto(
         Long id,
         String nombres,
         String apellidos,

@@ -6,7 +6,7 @@ import pe.gob.minedu.sigece.dtos.usuarios.RolResponseDto;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioFiltroRequestDto;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioRegistroRequestDto;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioRequestDto;
-import pe.gob.minedu.sigece.dtos.usuarios.UsuarioResponseDto;
+import pe.gob.minedu.sigece.dtos.usuarios.UsuarioMantenimientoResponseDto;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioResumenResponseDto;
 import pe.gob.minedu.sigece.enums.RolNombre;
 
@@ -26,7 +26,7 @@ public interface IUsuarioService {
      * @param dto Datos del nuevo usuario institucional.
      * @return Información del usuario creado.
      */
-    UsuarioResponseDto registrarUsuario(UsuarioRegistroRequestDto dto);
+    UsuarioMantenimientoResponseDto registrarUsuario(UsuarioRegistroRequestDto dto);
 
     /**
      * Actualiza los datos informativos y perfil de un usuario existente.
@@ -37,7 +37,7 @@ public interface IUsuarioService {
      * @param dto       Nuevos datos de perfil del usuario.
      * @return Datos actualizados del usuario.
      */
-    UsuarioResponseDto actualizarPerfil(Long usuarioId, UsuarioRequestDto dto);
+    UsuarioMantenimientoResponseDto actualizarPerfil(Long usuarioId, UsuarioRequestDto dto);
 
     /**
      * Permite a un usuario modificar su contraseña de acceso actual.
@@ -84,7 +84,7 @@ public interface IUsuarioService {
      * @param usuarioId Identificador del usuario.
      * @return Datos del usuario consultado.
      */
-    UsuarioResponseDto obtenerPorId(Long usuarioId);
+    UsuarioMantenimientoResponseDto obtenerPorId(Long usuarioId);
 
     /**
      * Obtiene un usuario a partir de su nombre de usuario (username/DNI).
@@ -94,7 +94,7 @@ public interface IUsuarioService {
      * @param username Nombre de usuario o identificador institucional.
      * @return Datos del usuario encontrado.
      */
-    UsuarioResponseDto obtenerPorUsername(String username);
+    UsuarioMantenimientoResponseDto obtenerPorUsername(String username);
 
     /**
      * Realiza una búsqueda paginada y filtrada de usuarios.
@@ -104,7 +104,7 @@ public interface IUsuarioService {
      * @param filtro Criterios de búsqueda y datos de paginación.
      * @return Página con los usuarios encontrados.
      */
-    PagedResponse<UsuarioResponseDto> buscar(UsuarioFiltroRequestDto filtro);
+    PagedResponse<UsuarioMantenimientoResponseDto> buscar(UsuarioFiltroRequestDto filtro);
 
     /**
      * Lista los usuarios activos que poseen un rol determinado (ej. TUTOR, PSICOLOGO).

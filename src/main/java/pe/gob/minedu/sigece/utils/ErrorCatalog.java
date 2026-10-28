@@ -89,6 +89,20 @@ public enum ErrorCatalog {
             HttpStatus.FORBIDDEN
     ),
 
+    HEADER_USUARIO_INVALIDO(
+            "ERR_AUTH_005",
+            "El identificador de usuario en el encabezado no es válido",
+            "Verifique que el encabezado X-Usuario-Id contenga un identificador numérico válido.",
+            HttpStatus.BAD_REQUEST
+    ),
+
+    USUARIO_ACTUAL_NO_IDENTIFICADO(
+            "ERR_AUTH_006",
+            "No se pudo determinar el usuario actual en la sesión o solicitud",
+            "Inicie sesión nuevamente o verifique que el token JWT sea válido.",
+            HttpStatus.UNAUTHORIZED
+    ),
+
     /**
      * Usuarios y roles
      */
@@ -453,8 +467,7 @@ public enum ErrorCatalog {
     INTERNAL_SERVER_ERROR(
             "ERR_SRV_001",
             "Ocurrió un error interno en el servidor",
-            "Intente nuevamente más tarde o comuníquese con soporte."
-            ,
+            "Intente nuevamente más tarde o comuníquese con soporte.",
             HttpStatus.INTERNAL_SERVER_ERROR
     );
 
