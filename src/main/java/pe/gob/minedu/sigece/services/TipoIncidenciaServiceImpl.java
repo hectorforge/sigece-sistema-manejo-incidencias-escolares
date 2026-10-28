@@ -46,6 +46,7 @@ public class TipoIncidenciaServiceImpl implements ITipoIncidenciaService {
                 .map(tipo -> {
                     tipo.setNombre(dto.nombre().trim());
                     tipo.setCategoriaSiseve(dto.categoriaSiseve());
+                    tipo.setGravedadBase(dto.gravedadBase());
                     tipo.setDescripcion(dto.descripcion() != null ? dto.descripcion().trim() : null);
                     return tipoIncidenciaRepository.save(tipo);
                 })

@@ -416,8 +416,7 @@ CREATE TABLE incidente_adjuntos (
 CREATE INDEX idx_adjuntos_incidente ON incidente_adjuntos(incidente_id);
 CREATE INDEX idx_adjuntos_accion    ON incidente_adjuntos(accion_id);
 CREATE INDEX idx_adjuntos_activo    ON incidente_adjuntos(incidente_id) WHERE activo = TRUE;
-CREATE UNIQUE INDEX uq_adjuntos_incidente_hash
-    ON incidente_adjuntos (incidente_id, hash_sha256)
+CREATE UNIQUE INDEX uq_adjuntos_incidente_hash ON incidente_adjuntos (incidente_id, hash_sha256)
     WHERE activo = TRUE;
 
 
@@ -470,6 +469,7 @@ CREATE TABLE notificaciones (
     detalle_resultado       VARCHAR(500),
     id_transaccion_externo  VARCHAR(150),
     created_at              TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp(),
+
     updated_at              TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp(),
 
                                 CONSTRAINT fk_notif_incidente FOREIGN KEY (incidente_id) REFERENCES incidentes(id) ON DELETE CASCADE,
