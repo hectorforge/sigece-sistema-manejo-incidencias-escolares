@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import pe.gob.minedu.sigece.enums.RolNombre;
 import pe.gob.minedu.sigece.models.Usuario;
 
 import java.util.List;
@@ -30,4 +32,8 @@ public interface IUsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpe
 
     @Query("SELECT COUNT(i) FROM Incidente i WHERE i.responsableActual.id = :usuarioId AND i.estado <> pe.gob.minedu.sigece.enums.EstadoIncidente.CERRADO")
     int countCasosActivosAsignados(@Param("usuarioId") Long usuarioId);
+
+
+    @Query("SELECT u FROM Usuario u WHERE u.rol.nombre = :rol AND u.activo = true")
+    List<Usuario> findAllByRolNombreAndActivoTrue(@Param("rol") RolNombre rol);
 }

@@ -1,0 +1,29 @@
+--------------------------------
+Usuario: admin.mendoza
+Contraseña: adminmen26
+Hash: $2a$10$aAeunZxuIcTGgFYRFeJDRuek4s5rZpvifwp6RWkRl6BfHPMHkWvPq
+--------------------------------
+Usuario: tutor.vargas
+Contraseña: tutorvargas26
+Hash: $2a$10$L2Nskotu0k6tz4.onEloc.kmNrPWXXVgvNAoC0ZiDbHojmRatHQdK
+--------------------------------
+Usuario: tutor.castro
+Contraseña: tutorcastro26
+Hash: $2a$10$74JVQiqUzyiBIGh4RbUs9uqPR7KDpd/GZbZWzXEuWSE43R6BPJSg.
+--------------------------------
+Usuario: psico.flores
+Contraseña: psicoflores26
+Hash: $2a$10$JUswwLK.3gLRjQHQEVzXIeCBaGRUhGPkHVqXGiWlRh/O/ZgKFM4l.
+--------------------------------
+Usuario: psico.salazar
+Contraseña: psicosal26
+Hash: $2a$10$iGEwi4lgUrzYuU63r2xJPObXj9Or0vOw7NxqCFCavaFtqzgvRHXki
+--------------------------------
+Usuario: invitado.gomez
+Contraseña: invitadogon2026
+Hash: $2a$10$OsEAB0bv4xlQNwG4O/U.qO63xpPrcPYu.jeo1YomrMNUnHF.tj6DO
+--------------------------------
+Usuario: inactivo.chavez
+Contraseña: inactivochavez2026
+Hash: $2a$10$WLfkSdzDAOdfJipNhMWfBuOKlMreaT484SYzh2gfH.zcMuZVMN3tm
+--------------------------------

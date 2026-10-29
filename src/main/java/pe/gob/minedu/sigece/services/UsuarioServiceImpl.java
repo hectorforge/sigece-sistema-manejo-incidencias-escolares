@@ -2,6 +2,7 @@ package pe.gob.minedu.sigece.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,16 +40,16 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     @Override
     @Transactional
-    public UsuarioResponseDto registrarUsuario(UsuarioRegistroRequestDto dto) {
-        log.info("Registrando usuario con username: {}", dto.username());
+    public UsuarioMantenimientoResponseDto registrarUsuario(UsuarioRegistroRequestDto dto) {
+        log.info("Registrando nuevo usuario con username: {}", dto.username());
 
-        if (usuarioRepository.existsByDni(dto.dni())) {
+        if (usuarioRepository.existsByDni(dto.dni().trim())) {
             throw new RecursoDuplicadoException(ErrorCatalog.USUARIO_DNI_DUPLICADO);
         }
-        if (usuarioRepository.existsByCorreo(dto.correo())) {
+        if (usuarioRepository.existsByCorreo(dto.correo().trim().toLowerCase())) {
             throw new RecursoDuplicadoException(ErrorCatalog.USUARIO_CORREO_DUPLICADO);
         }
-        if (usuarioRepository.existsByUsername(dto.username())) {
+        if (usuarioRepository.existsByUsername(dto.username().trim())) {
             throw new RecursoDuplicadoException(ErrorCatalog.USUARIO_USERNAME_DUPLICADO);
         }
 
@@ -63,13 +64,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     @Override
     @Transactional
-    public UsuarioResponseDto actualizarPerfil(Long usuarioId, UsuarioRequestDto dto) {
+    public UsuarioMantenimientoResponseDto actualizarPerfil(Long usuarioId, UsuarioRequestDto dto) {
         log.info("Actualizando perfil de usuario ID: {}", usuarioId);
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
 
-        if (!usuario.getCorreo().equalsIgnoreCase(dto.correo()) && usuarioRepository.existsByCorreo(dto.correo())) {
+        String correoNormalizado = dto.correo().trim().toLowerCase();
+        if (!usuario.getCorreo().equalsIgnoreCase(correoNormalizado) && usuarioRepository.existsByCorreo(correoNormalizado)) {
             throw new RecursoDuplicadoException(ErrorCatalog.USUARIO_CORREO_DUPLICADO);
         }
 
@@ -78,7 +80,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
         usuario.setNombres(dto.nombres().trim());
         usuario.setApellidos(dto.apellidos().trim());
-        usuario.setCorreo(dto.correo().trim().toLowerCase());
+        usuario.setCorreo(correoNormalizado);
         usuario.setTelefono(dto.telefono() != null ? dto.telefono().trim() : null);
         usuario.setRol(rol);
         usuario.setActivo(dto.activo());
@@ -89,17 +91,23 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     @Transactional
     public void cambiarPassword(Long usuarioId, CambioPasswordRequestDto dto) {
-        log.info("Cambiando password para usuario ID: {}", usuarioId);
+        log.info("Procesando cambio voluntario de contraseña para usuario ID: {}", usuarioId);
 
         if (!dto.nuevoPassword().equals(dto.confirmacionPassword())) {
-            throw new OperacionInvalidaException(ErrorCatalog.VALIDATION_ERROR, "Las contraseñas no coinciden");
+            throw new OperacionInvalidaException(
+                    ErrorCatalog.VALIDATION_ERROR,
+                    "La nueva contraseña y su confirmación no coinciden."
+            );
         }
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
 
         if (!passwordEncoder.matches(dto.passwordActual(), usuario.getPasswordHash())) {
-            throw new OperacionInvalidaException(ErrorCatalog.INVALID_CREDENTIALS, "La contraseña actual es incorrecta");
+            throw new OperacionInvalidaException(
+                    ErrorCatalog.INVALID_CREDENTIALS,
+                    "La contraseña actual proporcionada es incorrecta."
+            );
         }
 
         usuario.setPasswordHash(passwordEncoder.encode(dto.nuevoPassword()));
@@ -111,13 +119,15 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     @Transactional
     public void restablecerPassword(Long usuarioId) {
-        log.info("Restableciendo password por defecto para usuario ID: {}", usuarioId);
+        log.info("Restableciendo contraseña administrativa para usuario ID: {}", usuarioId);
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
 
-        String temporal = "Minedu@" + usuario.getDni();
-        usuario.setPasswordHash(passwordEncoder.encode(temporal));
+        // TODO: Servicio de generacion de cursos, por ahora se seta un prefijo estatico MINEDU
+        String passwordTemporal = "Minedu@" + usuario.getDni() ;
+
+        usuario.setPasswordHash(passwordEncoder.encode(passwordTemporal));
         usuario.setDebeCambiarPassword(true);
         usuario.setPasswordActualizadoAt(OffsetDateTime.now());
         usuarioRepository.save(usuario);
@@ -126,26 +136,30 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     @Transactional
     public void desactivarUsuario(Long usuarioId) {
-        usuarioRepository.findById(usuarioId)
-                .ifPresentOrElse(u -> {
-                    u.setActivo(false);
-                    usuarioRepository.save(u);
-                }, () -> { throw new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND); });
+        log.info("Desactivando usuario ID: {}", usuarioId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
+
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
     }
 
     @Override
     @Transactional
     public void reactivarUsuario(Long usuarioId) {
-        usuarioRepository.findById(usuarioId)
-                .ifPresentOrElse(u -> {
-                    u.setActivo(true);
-                    usuarioRepository.save(u);
-                }, () -> { throw new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND); });
+        log.info("Reactivando usuario ID: {}", usuarioId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
+
+        usuario.setActivo(true);
+        usuario.setIntentosFallidos(0);
+        usuario.setBloqueadoHasta(null);
+        usuarioRepository.save(usuario);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UsuarioResponseDto obtenerPorId(Long usuarioId) {
+    public UsuarioMantenimientoResponseDto obtenerPorId(Long usuarioId) {
         return usuarioRepository.findById(usuarioId)
                 .map(UsuarioMapper::toDto)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
@@ -153,22 +167,28 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public UsuarioResponseDto obtenerPorUsername(String username) {
-        return usuarioRepository.findByUsername(username)
+    public UsuarioMantenimientoResponseDto obtenerPorUsername(String username) {
+        return usuarioRepository.findByUsername(username.trim())
                 .map(UsuarioMapper::toDto)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<UsuarioResponseDto> buscar(UsuarioFiltroRequestDto filtro) {
+    public PagedResponse<UsuarioMantenimientoResponseDto> buscar(UsuarioFiltroRequestDto filtro) {
         int pageNumber = Optional.ofNullable(filtro).map(UsuarioFiltroRequestDto::page).orElse(0);
         int pageSize = Optional.ofNullable(filtro).map(UsuarioFiltroRequestDto::size).orElse(10);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        var page = usuarioRepository.findAll(UsuarioSpecification.conFiltro(filtro), pageable);
-        var content = page.map(UsuarioMapper::toDto).getContent();
-        var meta = new PaginationMeta(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+        Page<Usuario> page = usuarioRepository.findAll(UsuarioSpecification.conFiltro(filtro), pageable);
+        List<UsuarioMantenimientoResponseDto> content = page.map(UsuarioMapper::toDto).getContent();
+
+        PaginationMeta meta = new PaginationMeta(
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
 
         return new PagedResponse<>(content, meta);
     }
@@ -176,10 +196,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     @Transactional(readOnly = true)
     public List<UsuarioResumenResponseDto> listarPorRol(RolNombre rol) {
-        return usuarioRepository.findAllByRolNombreAndActivoTrue(rol.name())
-                .stream()
-                .map(u -> UsuarioMapper.toResumenDto(u, usuarioRepository.countCasosActivosAsignados(u.getId())))
-                .toList();
+        return usuarioRepository.findAllByRolNombreAndActivoTrue(rol)
+            .stream()
+            .map(u -> UsuarioMapper.toResumenDto(
+                u,
+                usuarioRepository.countCasosActivosAsignados(u.getId())))
+            .toList();
     }
 
     @Override
@@ -191,6 +213,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     @Transactional(readOnly = true)
     public List<RolResponseDto> listarRoles() {
-        return rolRepository.findAll().stream().map(UsuarioMapper::toRolDto).toList();
+        return rolRepository.findAll().stream()
+                .map(UsuarioMapper::toRolDto)
+                .toList();
     }
 }

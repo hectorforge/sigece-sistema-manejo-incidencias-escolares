@@ -4,6 +4,7 @@ import pe.gob.minedu.sigece.dtos.auth.AuthResponseDto;
 import pe.gob.minedu.sigece.dtos.auth.LoginRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.RefreshTokenRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.UsuarioResponseDto;
+import pe.gob.minedu.sigece.dtos.usuarios.UsuarioMantenimientoResponseDto;
 
 /**
  * Servicio encargado de la autenticación y del ciclo de vida de la sesión (JWT + Refresh Token).
@@ -48,5 +49,5 @@ public interface IAuthService {
      * @param usuarioId Identificador del usuario autenticado extraído del token JWT.
      * @return Datos del perfil del usuario autenticado.
      */
-    UsuarioResponseDto obtenerSesionActual(Long usuarioId);
+    UsuarioMantenimientoResponseDto obtenerSesionActual(Long usuarioId);
 }
