@@ -5,6 +5,8 @@ import pe.gob.minedu.sigece.dtos.incidentes.IncidenteResumenResponseDto;
 import pe.gob.minedu.sigece.models.Incidente;
 import pe.gob.minedu.sigece.models.Usuario;
 
+import java.util.List;
+
 public final class IncidenteMapper {
     private IncidenteMapper() {}
 
@@ -30,8 +32,14 @@ public final class IncidenteMapper {
 
     public static IncidenteResumenResponseDto toResumenDto(Incidente i) {
         return new IncidenteResumenResponseDto(
-                i.getId(), i.getCodigoCaso(), i.getTipoIncidencia().getNombre(), i.getGravedad(),
-                i.getLugarOcurrencia(), i.getFechaOcurrencia(), i.getEstado(),
-                nombre(i.getResponsableActual()));
+                i.getId(),
+                i.getCodigoCaso(),
+                i.getTipoIncidencia().getNombre(),
+                i.getGravedad(),
+                i.getLugarOcurrencia(),
+                i.getFechaOcurrencia(),
+                i.getEstado(),
+                nombre(i.getResponsableActual()),
+                List.of());
     }
 }

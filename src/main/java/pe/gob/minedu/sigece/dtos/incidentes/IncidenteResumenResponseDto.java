@@ -4,6 +4,7 @@ import pe.gob.minedu.sigece.enums.EstadoIncidente;
 import pe.gob.minedu.sigece.enums.Gravedad;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record IncidenteResumenResponseDto(
@@ -14,6 +15,7 @@ public record IncidenteResumenResponseDto(
         String lugarOcurrencia,
         OffsetDateTime fechaOcurrencia,
         EstadoIncidente estado,
-        String responsableNombre
+        String responsableNombre,
+        List<String>estudiantes
 ) {
 }

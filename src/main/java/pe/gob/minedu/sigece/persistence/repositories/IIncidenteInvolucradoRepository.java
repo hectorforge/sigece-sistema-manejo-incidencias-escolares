@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import pe.gob.minedu.sigece.enums.RolInvolucrado;
 import pe.gob.minedu.sigece.models.IncidenteInvolucrado;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ public interface IIncidenteInvolucradoRepository extends JpaRepository<Incidente
     List<IncidenteInvolucrado> findByIncidenteId(UUID incidenteId);
 
     List<IncidenteInvolucrado> findByEstudianteIdAndRolInvolucrado(Long estudianteId, RolInvolucrado rolInvolucrado);
+
+    List<IncidenteInvolucrado> findByIncidenteIdInAndEstudianteIsNotNull(Collection<UUID> incidenteIds);
 
     boolean existsByIncidenteIdAndEstudianteIdAndRolInvolucrado(UUID incidenteId, Long estudianteId, RolInvolucrado rol);
 

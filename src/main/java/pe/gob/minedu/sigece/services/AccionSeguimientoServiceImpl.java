@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.gob.minedu.sigece.dtos.seguimiento.*;
 import pe.gob.minedu.sigece.enums.EstadoAccion;
 import pe.gob.minedu.sigece.enums.EstadoIncidente;
+import pe.gob.minedu.sigece.enums.TipoAccion;
 import pe.gob.minedu.sigece.exceptions.OperacionInvalidaException;
 import pe.gob.minedu.sigece.exceptions.RecursoNoEncontradoException;
 import pe.gob.minedu.sigece.mappers.AccionSeguimientoMapper;
@@ -37,26 +38,34 @@ public class AccionSeguimientoServiceImpl implements IAccionSeguimientoService {
     @Override
     @Transactional
     public AccionSeguimientoResponseDto registrarAccion(UUID incidenteId, AccionSeguimientoRequestDto dto, Long usuarioId) {
-        log.info("Registrando acción de seguimiento para incidente ID: {}", incidenteId);
-
-        Incidente incidente = incidenteRepository.findById(incidenteId)
-                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_NOT_FOUND));
-
+        log.info(
+                "Registrando acción de seguimiento para incidente ID: {}",
+                incidenteId
+        );
+        Incidente incidente = incidenteRepository.findById(incidenteId).orElseThrow(() ->
+                new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_NOT_FOUND)
+        );
         if (incidente.getEstado() == EstadoIncidente.CERRADO) {
-            throw new OperacionInvalidaException(ErrorCatalog.INCIDENTE_CERRADO);
+            throw new OperacionInvalidaException(ErrorCatalog.INCIDENTE_CERRADO
+            );
         }
-
+        if ((dto.tipoAccion() == TipoAccion.ENTREVISTA_ESTUDIANTE || dto.tipoAccion() == TipoAccion.ENTREVISTA_PADRES || dto.tipoAccion() == TipoAccion.CITACION_APODERADO)
+                && dto.fechaProgramada() == null
+        ) {
+            throw new IllegalArgumentException("La fecha programada es obligatoria para entrevistas y citaciones."
+            );
+        }
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
-
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND)
+                );
         AccionSeguimiento accion = AccionSeguimientoMapper.toEntity(dto, incidente, usuario);
-
         if (incidente.getEstado() == EstadoIncidente.REGISTRADO || incidente.getEstado() == EstadoIncidente.EN_INVESTIGACION) {
             incidente.setEstado(EstadoIncidente.EN_SEGUIMIENTO);
             incidenteRepository.save(incidente);
         }
-
-        return AccionSeguimientoMapper.toDto(accionRepository.save(accion));
+        return AccionSeguimientoMapper.toDto(accionRepository.save(accion)
+        );
     }
 
     @Override

@@ -19,6 +19,7 @@ public final class AccionSeguimientoMapper {
         a.setTipoAccion(dto.tipoAccion());
         a.setDescripcion(dto.descripcion().trim());
         a.setFechaAccion(dto.fechaAccion() != null ? dto.fechaAccion() : OffsetDateTime.now());
+        a.setFechaProgramada(dto.fechaProgramada());
         a.setFechaProximaRevision(dto.fechaProximaRevision());
         a.setEstadoAccion(EstadoAccion.PENDIENTE);
         return a;
