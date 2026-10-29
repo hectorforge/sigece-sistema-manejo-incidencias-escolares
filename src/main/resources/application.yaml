@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/appdb
-    username: postgres
-    password: postgres
+    username: ${DB_USER}
+    password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -22,7 +22,7 @@ spring:
 # Variables entorno del sistema
 sigece:
   jwt:
-    secret: "TU_CLAVE_SECRETA_SUPER_SEGURA_Y_MUY_LARGA_AQUIASJDSAKDNKN1KJ2NKJN21JKKJJKNKAKJAKJKJASK**SJAIOD8SJ8OIADS"
+    secret: "Q7mN2xV9kL4pR8sT1wY6zA3bF5hJ0uC9dE2gK7nM4qI=sadaasdsaUISAHJDIUAJSHIUASIUHIAhaskjdha98198129812jiaousd"
     expiration-ms: 28800000        # 8 horas
     refresh-expiration-ms: 86400000 # 24 horas
   cors:
@@ -30,3 +30,8 @@ sigece:
     allowed-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
     allowed-headers: "Authorization,Content-Type,X-Requested-With,Accept"
     max-age-secs: 3600
+
+# Configuracion de los logs
+logging:
+  pattern:
+    level: "%5p [traceId: %X{traceId}]"
