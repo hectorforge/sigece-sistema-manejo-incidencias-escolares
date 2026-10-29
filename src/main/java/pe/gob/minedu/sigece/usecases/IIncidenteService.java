@@ -145,6 +145,16 @@ public interface IIncidenteService {
     List<IncidenteResumenResponseDto> obtenerHistorialPorEstudiante(Long estudianteId);
 
     /**
+     * Lista todos los incidentes registrados.
+     *
+     * <p>Caso de uso: <b>CU07 · Registrar incidente</b></p>
+     * <p>Rol: Personal autorizado</p>
+     *
+     * @return Lista completa de incidentes.
+     */
+    List<IncidenteResumenResponseDto> listarTodos();
+
+    /**
      * Genera el código institucional correlativo y correlacionado para un nuevo expediente (ej. EXP-2026-0001).
      * <p>Caso de uso: <b>CU07 · Registrar incidencia</b></p>
      * <p>Rol: Personal educativo (Tutor, Psicólogo)</p>

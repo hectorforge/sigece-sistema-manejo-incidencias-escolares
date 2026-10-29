@@ -33,6 +33,11 @@ public interface IIncidenteContractApi {
     ResponseEntity<ApiResponse<List<IncidenteResumenResponseDto>>> buscar(
             @ModelAttribute IncidenteFiltroRequestDto filtro, HttpServletRequest request);
 
+    @GetMapping
+    ResponseEntity<ApiResponse<List<IncidenteResumenResponseDto>>> listarTodos(
+            HttpServletRequest request
+    );
+
     // @PreAuthorize("hasAnyRole('ADMINISTRADOR','PSICOLOGO')")
     @Operation(summary = "Clasificar gravedad", description = "Roles: ADMINISTRADOR, PSICOLOGO.")
     @PatchMapping("/{incidenteId}/gravedad")

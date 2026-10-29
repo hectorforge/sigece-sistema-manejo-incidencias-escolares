@@ -44,6 +44,12 @@ public class IncidenteController extends BaseController implements IIncidenteCon
     }
 
     @Override
+    public ResponseEntity<ApiResponse<List<IncidenteResumenResponseDto>>> listarTodos(HttpServletRequest request) {
+        List<IncidenteResumenResponseDto> data = incidenteService.listarTodos();
+        return ResponseEntity.ok(ApiResponse.success(data, "Lista completa de incidentes obtenida exitosamente",HttpStatus.OK, request.getRequestURI(), getTraceId(request)));
+    }
+
+    @Override
     public ResponseEntity<ApiResponse<IncidenteResponseDto>> clasificarGravedad(UUID incidenteId, ClasificarGravedadRequestDto dto, HttpServletRequest request) {
         return ok(incidenteService.clasificarGravedad(incidenteId, dto, usuarioActual.obtenerId(request)),
                 "Gravedad clasificada exitosamente", request);

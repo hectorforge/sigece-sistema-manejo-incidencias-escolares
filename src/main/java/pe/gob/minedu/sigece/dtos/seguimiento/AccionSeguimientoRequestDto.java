@@ -16,6 +16,8 @@ public record AccionSeguimientoRequestDto(
 
         OffsetDateTime fechaAccion,
 
+        OffsetDateTime fechaProgramada,
+
         LocalDate fechaProximaRevision
 ) {
 }

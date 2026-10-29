@@ -187,7 +187,7 @@ public class OpenApiConfig {
                         .in(SecurityScheme.In.HEADER)
                         .name("X-Usuario-Id")
                         .description("SOLO DESARROLLO: ID numérico del usuario que actúa (ej. 3). Se elimina al activar JWT."))
-                .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme())
+                //.addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme())
                 .addResponses("400BadRequest", new ApiResponse()
                         .description("Petición inválida, error de validación de campos o regla de negocio no superada.")
                         .content(new Content().addMediaType("application/json", errorMediaType)))

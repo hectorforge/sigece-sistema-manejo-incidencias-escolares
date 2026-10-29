@@ -56,23 +56,46 @@ public class IncidenteSpecification {
                 }
             }
 
+
             if (aulasTutor != null) {
                 if (aulasTutor.isEmpty()) {
                     ps.add(cb.disjunction());
                 } else {
+                    // Subconsulta: incidentes con estudiantes de las aulas del tutor.
                     Subquery<Long> sub = query.subquery(Long.class);
-                    Root<IncidenteInvolucrado> ii = sub.from(IncidenteInvolucrado.class);
-                    Join<IncidenteInvolucrado, Estudiante> est = ii.join("estudiante");
-                    List<Predicate> aulas = aulasTutor.stream().map(t -> cb.and(
-                            cb.equal(est.get("nivel"), t.getNivel()),
-                            cb.equal(est.get("grado"), t.getGrado()),
-                            cb.equal(est.get("seccion"), t.getSeccion()))).toList();
+                    Root<IncidenteInvolucrado> ii =
+                            sub.from(IncidenteInvolucrado.class);
+
+                    Join<IncidenteInvolucrado, Estudiante> est =
+                            ii.join("estudiante");
+
+                    List<Predicate> aulas = aulasTutor.stream()
+                            .map(t -> cb.and(
+                                    cb.equal(est.get("nivel"), t.getNivel()),
+                                    cb.equal(est.get("grado"), t.getGrado()),
+                                    cb.equal(est.get("seccion"), t.getSeccion())
+                            ))
+                            .toList();
+
                     sub.select(ii.get("id")).where(
                             cb.equal(ii.get("incidente"), root),
-                            cb.or(aulas.toArray(new Predicate[0])));
-                    ps.add(cb.exists(sub));
+                            cb.or(aulas.toArray(new Predicate[0]))
+                    );
+
+                    // El tutor puede consultar:
+                    // 1. Incidentes asociados a estudiantes de sus aulas.
+                    // 2. Incidentes que él mismo registró.
+                    Predicate perteneceAula = cb.exists(sub);
+
+                    Predicate registradoPorTutor = cb.equal(
+                            root.get("reportadoPor").get("id"),
+                            aulasTutor.get(0).getUsuario().getId()
+                    );
+
+                    ps.add(cb.or(perteneceAula, registradoPorTutor));
                 }
             }
+
             return cb.and(ps.toArray(new Predicate[0]));
         };
     }

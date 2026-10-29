@@ -11,6 +11,7 @@ public final class TipoIncidenciaMapper {
         TipoIncidencia entity = new TipoIncidencia();
         entity.setNombre(dto.nombre().trim());
         entity.setCategoriaSiseve(dto.categoriaSiseve());
+        entity.setGravedadBase(dto.gravedadBase());
         entity.setDescripcion(dto.descripcion() != null ? dto.descripcion().trim() : null);
         entity.setActivo(true);
         return entity;
@@ -21,6 +22,7 @@ public final class TipoIncidenciaMapper {
                 entity.getId(),
                 entity.getNombre(),
                 entity.getCategoriaSiseve(),
+                entity.getGravedadBase(),
                 entity.getDescripcion(),
                 entity.getActivo()
         );

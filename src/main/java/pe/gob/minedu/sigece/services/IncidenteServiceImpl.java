@@ -18,10 +18,7 @@ import pe.gob.minedu.sigece.enums.RolNombre;
 import pe.gob.minedu.sigece.exceptions.OperacionInvalidaException;
 import pe.gob.minedu.sigece.exceptions.RecursoNoEncontradoException;
 import pe.gob.minedu.sigece.mappers.*;
-import pe.gob.minedu.sigece.models.Incidente;
-import pe.gob.minedu.sigece.models.TipoIncidencia;
-import pe.gob.minedu.sigece.models.TutorAula;
-import pe.gob.minedu.sigece.models.Usuario;
+import pe.gob.minedu.sigece.models.*;
 import pe.gob.minedu.sigece.persistence.repositories.*;
 import pe.gob.minedu.sigece.persistence.specs.IncidenteSpecification;
 import pe.gob.minedu.sigece.usecases.IAccesoAulaService;
@@ -32,6 +29,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.Year;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -129,6 +127,28 @@ public class IncidenteServiceImpl implements IIncidenteService {
                 pageable
         );
 
+        var incidentes = page.getContent();
+
+        var incidenteIds = incidentes.stream()
+                .map(Incidente::getId)
+                .toList();
+
+        var involucrados = incidenteIds.isEmpty()
+                ? List.<IncidenteInvolucrado>of()
+                : involucradoRepository
+                .findByIncidenteIdInAndEstudianteIsNotNull(incidenteIds);
+
+        Map<UUID, List<String>> estudiantesPorIncidente = involucrados.stream()
+                .filter(inv -> inv.getEstudiante() != null)
+                .collect(Collectors.groupingBy(
+                        inv -> inv.getIncidente().getId(),
+                        Collectors.mapping(
+                                inv -> inv.getEstudiante().getNombres()
+                                        + " " + inv.getEstudiante().getApellidos(),
+                                Collectors.toList()
+                        )
+                ));
+
         var meta = new PaginationMeta(
                 page.getNumber(),
                 page.getSize(),
@@ -136,7 +156,24 @@ public class IncidenteServiceImpl implements IIncidenteService {
                 page.getTotalPages()
         );
 
-        return new PagedResponse<>(page.map(IncidenteMapper::toResumenDto).getContent(), meta);
+        var contenido = incidentes.stream()
+                .map(i -> new IncidenteResumenResponseDto(
+                        i.getId(),
+                        i.getCodigoCaso(),
+                        i.getTipoIncidencia().getNombre(),
+                        i.getGravedad(),
+                        i.getLugarOcurrencia(),
+                        i.getFechaOcurrencia(),
+                        i.getEstado(),
+                        i.getResponsableActual() == null
+                                ? null
+                                : i.getResponsableActual().getNombres()
+                                + " " + i.getResponsableActual().getApellidos(),
+                        estudiantesPorIncidente.getOrDefault(i.getId(), List.of())
+                ))
+                .toList();
+
+        return new PagedResponse<>(contenido, meta);
     }
 
     // ------------------------------------------------------------------ gestión
@@ -365,6 +402,15 @@ public class IncidenteServiceImpl implements IIncidenteService {
     @Transactional(readOnly = true)
     public List<IncidenteResumenResponseDto> obtenerHistorialPorEstudiante(Long estudianteId) {
         return incidenteRepository.findAllByEstudianteId(estudianteId).stream()
+                .map(IncidenteMapper::toResumenDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<IncidenteResumenResponseDto> listarTodos() {
+        return incidenteRepository.findAll()
+                .stream()
                 .map(IncidenteMapper::toResumenDto)
                 .toList();
     }

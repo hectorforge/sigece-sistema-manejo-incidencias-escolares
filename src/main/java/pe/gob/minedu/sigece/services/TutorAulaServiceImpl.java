@@ -26,7 +26,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class TutorAulaServiceImpl implements ITutorAulaService {
-    private static final String ROL_TUTOR = "TUTOR";   // ajusta si tu Rol usa otro campo
+    private static final String ROL_TUTOR = "ROLE_TUTOR";   // ajusta si tu Rol usa otro campo
 
     private final ITutorAulaRepository tutorAulaRepository;
     private final IUsuarioRepository usuarioRepository;
@@ -34,31 +34,55 @@ public class TutorAulaServiceImpl implements ITutorAulaService {
     @Override
     @Transactional
     public TutorAulaResponseDto asignarAula(TutorAulaRequestDto dto) {
+
         Usuario tutor = usuarioRepository.findById(dto.usuarioId())
                 .filter(Usuario::getActivo)
-                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(
+                                ErrorCatalog.USUARIO_NOT_FOUND
+                        )
+                );
 
-        // La BD no valida el rol (lo hace la aplicación, según el esquema)
-        if (!ROL_TUTOR.equals(tutor.getRol().getNombre())) {
-            throw new OperacionInvalidaException(ErrorCatalog.TUTOR_AULA_ROL_INVALIDO);
+        String nombreRol = tutor.getRol() != null
+                ? String.valueOf(tutor.getRol().getNombre())
+                : null;
+
+        if (!ROL_TUTOR.equals(nombreRol)) {
+            throw new OperacionInvalidaException(
+                    ErrorCatalog.TUTOR_AULA_ROL_INVALIDO
+            );
         }
 
         Nivel nivel = dto.nivel();
         String grado = dto.grado().trim();
         String seccion = dto.seccion().trim().toUpperCase();
-        int anio = dto.anioEscolar() != null ? dto.anioEscolar() : Year.now().getValue();
+        int anio = dto.anioEscolar() != null
+                ? dto.anioEscolar()
+                : Year.now().getValue();
 
         Optional<TutorAula> existente = tutorAulaRepository
                 .findByUsuarioIdAndNivelAndGradoAndSeccionAndAnioEscolar(
-                        tutor.getId(), nivel, grado, seccion, anio);
+                        tutor.getId(),
+                        nivel,
+                        grado,
+                        seccion,
+                        anio
+                );
 
         if (existente.isPresent()) {
             TutorAula ta = existente.get();
+
             if (ta.isActivo()) {
-                throw new RecursoDuplicadoException(ErrorCatalog.TUTOR_AULA_DUPLICADA);
+                throw new RecursoDuplicadoException(
+                        ErrorCatalog.TUTOR_AULA_DUPLICADA
+                );
             }
-            ta.setActivo(true);                    // misma aula dada de baja: se reactiva
-            return TutorAulaMapper.toDto(tutorAulaRepository.save(ta));
+
+            ta.setActivo(true);
+
+            return TutorAulaMapper.toDto(
+                    tutorAulaRepository.save(ta)
+            );
         }
 
         TutorAula ta = new TutorAula();
@@ -69,10 +93,19 @@ public class TutorAulaServiceImpl implements ITutorAulaService {
         ta.setAnioEscolar(anio);
         ta.setActivo(true);
 
-        log.info("Aula {} {} {} ({}) asignada al tutor ID: {}", nivel, grado, seccion, anio, tutor.getId());
-        return TutorAulaMapper.toDto(tutorAulaRepository.save(ta));
-    }
+        log.info(
+                "Aula {} {} {} ({}) asignada al tutor ID: {}",
+                nivel,
+                grado,
+                seccion,
+                anio,
+                tutor.getId()
+        );
 
+        return TutorAulaMapper.toDto(
+                tutorAulaRepository.save(ta)
+        );
+    }
     @Override
     @Transactional(readOnly = true)
     public List<TutorAulaResponseDto> listarPorTutor(Long usuarioId, Integer anioEscolar) {
