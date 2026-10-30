@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoFiltroRequestDto;
 import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoRequestDto;
@@ -28,6 +29,7 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos de entrada inválidos", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Documento ya registrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     ResponseEntity<ApiResponse<ApoderadoResponseDto>> registrarApoderado(
             @Valid @RequestBody ApoderadoRequestDto dto,
@@ -39,6 +41,7 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Contacto actualizado exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Apoderado no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{apoderadoId}/contacto")
     ResponseEntity<ApiResponse<ApoderadoResponseDto>> actualizarDatosContacto(
             @Parameter(description = "ID único del apoderado", example = "1", required = true) @PathVariable Long apoderadoId,
@@ -51,6 +54,7 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Apoderado encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Apoderado no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/{apoderadoId}")
     ResponseEntity<ApiResponse<ApoderadoResponseDto>> obtenerPorId(
             @Parameter(description = "ID único del apoderado", example = "1", required = true) @PathVariable Long apoderadoId,
@@ -62,6 +66,7 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Apoderado encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Documento no registrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/documento/{numeroDocumento}")
     ResponseEntity<ApiResponse<ApoderadoResponseDto>> obtenerPorNumeroDocumento(
             @Parameter(description = "Número de documento", example = "72345678", required = true) @PathVariable String numeroDocumento,
@@ -72,6 +77,7 @@ public interface IApoderadoContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/estudiante/{estudianteId}")
     ResponseEntity<ApiResponse<List<ApoderadoResponseDto>>> listarPorEstudiante(
             @Parameter(description = "ID del estudiante", example = "10", required = true) @PathVariable Long estudianteId,
@@ -83,6 +89,7 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Vínculos obtenidos", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Apoderado no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/{apoderadoId}/vinculos")
     ResponseEntity<ApiResponse<List<VinculoFamiliarResponseDto>>> listarVinculosPorApoderado(
             @Parameter(description = "ID del apoderado", example = "1", required = true) @PathVariable Long apoderadoId,
@@ -93,6 +100,7 @@ public interface IApoderadoContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Búsqueda paginada exitosa", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/buscar")
     ResponseEntity<ApiResponse<List<ApoderadoResponseDto>>> buscar(
             @ModelAttribute ApoderadoFiltroRequestDto filtro,
@@ -104,6 +112,7 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Contacto principal actualizado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Vínculo o entidad no encontrada", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{apoderadoId}/estudiantes/{estudianteId}/principal")
     ResponseEntity<ApiResponse<Void>> marcarContactoPrincipal(
             @Parameter(description = "ID del estudiante", example = "10", required = true) @PathVariable Long estudianteId,

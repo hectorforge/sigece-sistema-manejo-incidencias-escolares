@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.minedu.sigece.dtos.auth.CambioPasswordRequestDto;
 import pe.gob.minedu.sigece.dtos.common.ApiResponse;
@@ -29,6 +30,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos de entrada inválidos", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "DNI, correo o username ya registrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> registrarUsuario(
             @Valid @RequestBody UsuarioRegistroRequestDto dto,
@@ -40,6 +42,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Perfil actualizado exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario o rol no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{usuarioId}")
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> actualizarPerfil(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,
@@ -52,6 +55,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Contraseña actualizada exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Contraseña actual incorrecta o discrepancia en confirmación", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/cambiar-password")
     ResponseEntity<ApiResponse<Void>> cambiarPassword(
             @Valid @RequestBody CambioPasswordRequestDto dto,
@@ -63,6 +67,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Contraseña restablecida correctamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{usuarioId}/restablecer-password")
     ResponseEntity<ApiResponse<Void>> restablecerPassword(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,
@@ -74,6 +79,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario desactivado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{usuarioId}/desactivar")
     ResponseEntity<ApiResponse<Void>> desactivarUsuario(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,
@@ -85,6 +91,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario reactivado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{usuarioId}/reactivar")
     ResponseEntity<ApiResponse<Void>> reactivarUsuario(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,
@@ -96,6 +103,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario recuperado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
     @GetMapping("/{usuarioId}")
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> obtenerPorId(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,
@@ -107,6 +115,7 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario recuperado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
     @GetMapping("/username/{username}")
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> obtenerPorUsername(
             @Parameter(description = "Username del usuario", example = "admin_colegio", required = true) @PathVariable String username,
@@ -117,6 +126,7 @@ public interface IUsuarioContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuarios listados exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/buscar")
     ResponseEntity<ApiResponse<List<UsuarioMantenimientoResponseDto>>> buscar(
             @ModelAttribute UsuarioFiltroRequestDto filtro,
@@ -127,6 +137,7 @@ public interface IUsuarioContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuarios filtrados por rol", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
     @GetMapping("/rol/{rol}")
     ResponseEntity<ApiResponse<List<UsuarioResumenResponseDto>>> listarPorRol(
             @Parameter(description = "Rol a filtrar", example = "ROLE_PSICOLOGO", required = true) @PathVariable RolNombre rol,
@@ -137,6 +148,7 @@ public interface IUsuarioContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Conteo obtenido", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
     @GetMapping("/{usuarioId}/casos-activos/conteo")
     ResponseEntity<ApiResponse<Integer>> contarCasosActivosAsignados(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,
@@ -147,6 +159,7 @@ public interface IUsuarioContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Catálogo de roles", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/roles")
     ResponseEntity<ApiResponse<List<RolResponseDto>>> listarRoles(
             HttpServletRequest request

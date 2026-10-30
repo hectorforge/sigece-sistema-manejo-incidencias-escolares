@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,7 @@ public interface IAuthContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Credenciales mal formadas", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Credenciales inválidas o cuenta deshabilitada/bloqueada", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("permitAll()")
     @PostMapping("/login")
     ResponseEntity<ApiResponse<AuthResponseDto>> login(
             @Valid @RequestBody LoginRequestDto dto,
@@ -40,6 +42,7 @@ public interface IAuthContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Token renovado exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Refresh token expirado o inválido", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("permitAll()")
     @PostMapping("/refresh")
     ResponseEntity<ApiResponse<AuthResponseDto>> refresh(
             @Valid @RequestBody RefreshTokenRequestDto dto,
@@ -50,6 +53,7 @@ public interface IAuthContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Sesión cerrada correctamente", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/logout")
     ResponseEntity<ApiResponse<Void>> logout(
             @Valid @RequestBody RefreshTokenRequestDto dto,
@@ -61,6 +65,7 @@ public interface IAuthContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Datos de sesión recuperados", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> me(
             HttpServletRequest request

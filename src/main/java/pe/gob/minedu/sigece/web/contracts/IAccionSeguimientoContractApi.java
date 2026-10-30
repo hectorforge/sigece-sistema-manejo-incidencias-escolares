@@ -1,4 +1,3 @@
-
 package pe.gob.minedu.sigece.web.contracts;
 
 import java.util.List;
@@ -22,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -58,6 +58,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
     @PostMapping("/incidente/{incidenteId}")
     ResponseEntity<ApiResponse<AccionSeguimientoResponseDto>> registrarAccion(
             @Parameter(description = "Identificador UUID de la incidencia", required = true)
@@ -82,6 +83,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
     @PatchMapping("/{accionId}/estado")
     ResponseEntity<ApiResponse<AccionSeguimientoResponseDto>> actualizarEstadoAccion(
             @Parameter(description = "Identificador de la acción de seguimiento", example = "1", required = true)
@@ -106,6 +108,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
     @PatchMapping("/{accionId}/revision")
     ResponseEntity<ApiResponse<AccionSeguimientoResponseDto>> reprogramarProximaRevision(
             @Parameter(description = "Identificador de la acción de seguimiento", example = "1", required = true)
@@ -130,6 +133,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
     @GetMapping("/{accionId}")
     ResponseEntity<ApiResponse<AccionSeguimientoResponseDto>> obtenerPorId(
             @Parameter(description = "Identificador de la acción de seguimiento", example = "1", required = true)
@@ -148,6 +152,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
     @GetMapping("/incidente/{incidenteId}")
     ResponseEntity<ApiResponse<List<AccionSeguimientoResponseDto>>> listarPorIncidente(
             @Parameter(description = "Identificador UUID de la incidencia", required = true)
@@ -166,6 +171,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
     @GetMapping("/usuario/{usuarioId}/pendientes")
     ResponseEntity<ApiResponse<List<AccionSeguimientoResponseDto>>> listarPendientesPorUsuario(
             @Parameter(description = "Identificador del usuario", example = "1", required = true)
@@ -184,6 +190,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
     @GetMapping("/vencidas")
     ResponseEntity<ApiResponse<List<AccionSeguimientoResponseDto>>> listarAccionesVencidas(
             HttpServletRequest request
@@ -200,6 +207,7 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
     @GetMapping("/buscar")
     ResponseEntity<ApiResponse<List<AccionSeguimientoResponseDto>>> listarPorTipo(
             @ModelAttribute AccionFiltroRequestDto filtro,

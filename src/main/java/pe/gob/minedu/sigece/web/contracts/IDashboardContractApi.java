@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ public interface IDashboardContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Indicadores calculados exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Filtros inválidos", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
     @GetMapping("/indicadores")
     ResponseEntity<ApiResponse<DashboardResponseDto>> obtenerIndicadores(
             @ModelAttribute DashboardFiltroRequestDto filtro,

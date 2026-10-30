@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.minedu.sigece.dtos.common.ApiResponse;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaRequestDto;
@@ -27,6 +28,7 @@ public interface ITipoIncidenciaContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos de entrada inválidos", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "El tipo de incidencia ya existe", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     ResponseEntity<ApiResponse<TipoIncidenciaResponseDto>> crear(
             @Valid @RequestBody TipoIncidenciaRequestDto dto,
@@ -38,6 +40,7 @@ public interface ITipoIncidenciaContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tipo de incidencia actualizado exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Tipo de incidencia no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     ResponseEntity<ApiResponse<TipoIncidenciaResponseDto>> actualizar(
             @Parameter(description = "ID del tipo de incidencia", example = "1", required = true) @PathVariable Long id,
@@ -50,6 +53,7 @@ public interface ITipoIncidenciaContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tipo de incidencia desactivado exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Tipo de incidencia no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{id}/desactivar")
     ResponseEntity<ApiResponse<Void>> desactivar(
             @Parameter(description = "ID del tipo de incidencia", example = "1", required = true) @PathVariable Long id,
@@ -61,6 +65,7 @@ public interface ITipoIncidenciaContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tipo de incidencia reactivado exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Tipo de incidencia no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{id}/reactivar")
     ResponseEntity<ApiResponse<Void>> reactivar(
             @Parameter(description = "ID del tipo de incidencia", example = "1", required = true) @PathVariable Long id,
@@ -72,6 +77,7 @@ public interface ITipoIncidenciaContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tipo de incidencia recuperado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Tipo de incidencia no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/{id}")
     ResponseEntity<ApiResponse<TipoIncidenciaResponseDto>> obtenerPorId(
             @Parameter(description = "ID del tipo de incidencia", example = "1", required = true) @PathVariable Long id,
@@ -82,6 +88,7 @@ public interface ITipoIncidenciaContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Listado completo obtenido", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping
     ResponseEntity<ApiResponse<List<TipoIncidenciaResponseDto>>> listarTodos(
             HttpServletRequest request
@@ -91,6 +98,7 @@ public interface ITipoIncidenciaContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Listado de activos obtenido", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/activos")
     ResponseEntity<ApiResponse<List<TipoIncidenciaResponseDto>>> listarActivos(
             HttpServletRequest request
@@ -100,6 +108,7 @@ public interface ITipoIncidenciaContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Listado por categoría obtenido", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/categoria/{categoria}")
     ResponseEntity<ApiResponse<List<TipoIncidenciaResponseDto>>> listarPorCategoriaSiseve(
             @Parameter(description = "Categoría oficial SíSeVe", example = "CIBERACOSO", required = true) @PathVariable CategoriaSiseve categoria,

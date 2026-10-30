@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.gob.minedu.sigece.dtos.common.ApiResponse;
 import pe.gob.minedu.sigece.dtos.involucrados.InvolucradoRequestDto;
@@ -21,27 +22,32 @@ import java.util.UUID;
 public interface IIncidenteInvolucradoContractApi {
 
     @Operation(summary = "Agregar involucrado", description = "Debe enviar estudianteId o usuarioId, no ambos. Roles: TUTOR, PSICOLOGO.")
+    @PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO', 'ADMINISTRADOR')")
     @PostMapping("/incidentes/{incidenteId}/involucrados")
     ResponseEntity<ApiResponse<InvolucradoResponseDto>> agregarInvolucrado(
             @PathVariable UUID incidenteId, @Valid @RequestBody InvolucradoRequestDto dto, HttpServletRequest request);
 
     @Operation(summary = "Remover involucrado", description = "Exige el motivo del retiro en el cuerpo.")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
     @DeleteMapping("/incidentes/{incidenteId}/involucrados/{involucradoId}")
     ResponseEntity<ApiResponse<Void>> removerInvolucrado(
             @PathVariable UUID incidenteId, @PathVariable Long involucradoId,
             @Valid @RequestBody RemoverInvolucradoRequestDto dto, HttpServletRequest request);
 
     @Operation(summary = "Listar involucrados del incidente")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/incidentes/{incidenteId}/involucrados")
     ResponseEntity<ApiResponse<List<InvolucradoResponseDto>>> listarPorIncidente(
             @PathVariable UUID incidenteId, HttpServletRequest request);
 
     @Operation(summary = "Involucrados agrupados por rol")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/incidentes/{incidenteId}/involucrados/agrupados")
     ResponseEntity<ApiResponse<InvolucradosAgrupadosResponseDto>> listarAgrupados(
             @PathVariable UUID incidenteId, HttpServletRequest request);
 
     @Operation(summary = "Participaciones de un estudiante según su rol")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/estudiantes/{estudianteId}/involucraciones")
     ResponseEntity<ApiResponse<List<InvolucradoResponseDto>>> listarPorEstudianteYRol(
             @PathVariable Long estudianteId, @RequestParam RolInvolucrado rol, HttpServletRequest request);

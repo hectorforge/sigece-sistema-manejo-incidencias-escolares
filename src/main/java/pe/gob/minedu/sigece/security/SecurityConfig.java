@@ -35,7 +35,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final JwtAccessDeniedHandler accessDeniedHandler;
 
-    @Value("${sigece.cors.allowed-origins")
+    @Value("${sigece.cors.allowed-origins}")
     private String allowedOrigins;
 
     @Value("${sigece.cors.allowed-methods}")
