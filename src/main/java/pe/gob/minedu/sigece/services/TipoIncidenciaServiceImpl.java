@@ -2,15 +2,25 @@ package pe.gob.minedu.sigece.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoFiltroRequestDto;
+import pe.gob.minedu.sigece.dtos.apoderados.ApoderadoResponseDto;
+import pe.gob.minedu.sigece.dtos.common.PagedResponse;
+import pe.gob.minedu.sigece.dtos.common.PaginationMeta;
+import pe.gob.minedu.sigece.dtos.incidentes.IncidenteFiltroRequestDto;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaRequestDto;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaResponseDto;
+import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoInicidenciaFiltroRequestDto;
 import pe.gob.minedu.sigece.enums.CategoriaSiseve;
 import pe.gob.minedu.sigece.exceptions.RecursoDuplicadoException;
 import pe.gob.minedu.sigece.exceptions.RecursoNoEncontradoException;
 import pe.gob.minedu.sigece.mappers.TipoIncidenciaMapper;
 import pe.gob.minedu.sigece.persistence.repositories.ITipoIncidenciaRepository;
+import pe.gob.minedu.sigece.persistence.specs.TipoIncidenciaSpecification;
 import pe.gob.minedu.sigece.usecases.ITipoIncidenciaService;
 import pe.gob.minedu.sigece.utils.ErrorCatalog;
 
@@ -89,6 +99,39 @@ public class TipoIncidenciaServiceImpl implements ITipoIncidenciaService {
                 .stream()
                 .map(TipoIncidenciaMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<TipoIncidenciaResponseDto> buscar(
+            TipoInicidenciaFiltroRequestDto filtro
+    ) {
+        int pageNumber = Optional.ofNullable(filtro)
+                .map(TipoInicidenciaFiltroRequestDto::page)
+                .orElse(0);
+
+        int pageSize = Optional.ofNullable(filtro)
+                .map(TipoInicidenciaFiltroRequestDto::size)
+                .orElse(10);
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        var page = tipoIncidenciaRepository.findAll(
+                TipoIncidenciaSpecification.conFiltro(filtro),
+                pageable
+        );
+
+        var content = page.map(TipoIncidenciaMapper::toDto)
+                .getContent();
+
+        var meta = new PaginationMeta(
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+
+        return new PagedResponse<>(content, meta);
     }
 
     @Override

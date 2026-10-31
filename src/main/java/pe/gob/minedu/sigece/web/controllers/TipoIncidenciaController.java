@@ -6,8 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pe.gob.minedu.sigece.dtos.common.ApiResponse;
+import pe.gob.minedu.sigece.dtos.common.PagedResponse;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaRequestDto;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaResponseDto;
+import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoInicidenciaFiltroRequestDto;
 import pe.gob.minedu.sigece.enums.CategoriaSiseve;
 import pe.gob.minedu.sigece.usecases.ITipoIncidenciaService;
 import pe.gob.minedu.sigece.web.contracts.ITipoIncidenciaContractApi;
@@ -44,6 +46,12 @@ public class TipoIncidenciaController implements ITipoIncidenciaContractApi {
     public ResponseEntity<ApiResponse<Void>> reactivar(Long id, HttpServletRequest request) {
         tipoIncidenciaService.reactivar(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Tipo de incidencia reactivado exitosamente", HttpStatus.OK, request.getRequestURI(), getTraceId(request)));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<List<TipoIncidenciaResponseDto>>> buscar(TipoInicidenciaFiltroRequestDto filtro, HttpServletRequest request) {
+        PagedResponse<TipoIncidenciaResponseDto> response = tipoIncidenciaService.buscar(filtro);
+        return ResponseEntity.ok(ApiResponse.paginated(response.content(), response.meta(), "Tipos de incidencia listados exitosamente", request.getRequestURI(), getTraceId(request)));
     }
 
     @Override

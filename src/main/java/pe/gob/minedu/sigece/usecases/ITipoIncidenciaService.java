@@ -1,7 +1,9 @@
 package pe.gob.minedu.sigece.usecases;
 
+import pe.gob.minedu.sigece.dtos.common.PagedResponse;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaRequestDto;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaResponseDto;
+import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoInicidenciaFiltroRequestDto;
 import pe.gob.minedu.sigece.enums.CategoriaSiseve;
 
 import java.util.List;
@@ -69,6 +71,15 @@ public interface ITipoIncidenciaService {
      * @return Lista completa del catálogo.
      */
     List<TipoIncidenciaResponseDto> listarTodos();
+
+    /**
+     * Busca y pagina tipos de incidencias mediante filtros (categoria siseve, gravedad).
+     * <p>Rol: Administrador</p>
+     *
+     * @param filtro Criterios de búsqueda y paginación.
+     * @return Página de tipos de incidentes coincidentes.
+     */
+    PagedResponse<TipoIncidenciaResponseDto> buscar(TipoInicidenciaFiltroRequestDto filtro);
 
     /**
      * Lista únicamente los tipos de incidencia actualmente activos.

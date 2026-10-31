@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import pe.gob.minedu.sigece.dtos.common.ApiResponse;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaRequestDto;
 import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoIncidenciaResponseDto;
+import pe.gob.minedu.sigece.dtos.tiposincidencia.TipoInicidenciaFiltroRequestDto;
 import pe.gob.minedu.sigece.enums.CategoriaSiseve;
 
 import java.util.List;
@@ -69,6 +70,12 @@ public interface ITipoIncidenciaContractApi {
     @PatchMapping("/{id}/reactivar")
     ResponseEntity<ApiResponse<Void>> reactivar(
             @Parameter(description = "ID del tipo de incidencia", example = "1", required = true) @PathVariable Long id,
+            HttpServletRequest request
+    );
+
+    @GetMapping("/buscar")
+    ResponseEntity<ApiResponse<List<TipoIncidenciaResponseDto>>> buscar(
+            @ModelAttribute TipoInicidenciaFiltroRequestDto filtro,
             HttpServletRequest request
     );
 
