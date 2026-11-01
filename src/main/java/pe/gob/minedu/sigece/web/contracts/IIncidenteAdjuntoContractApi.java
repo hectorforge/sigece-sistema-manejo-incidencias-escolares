@@ -20,7 +20,8 @@ import java.util.UUID;
 public interface IIncidenteAdjuntoContractApi {
 
     @Operation(summary = "Subir evidencia", description = "multipart/form-data: parte 'datos' (JSON) y parte 'archivo'. Máximo 10 MB.")
-    @PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO', 'ADMINISTRADOR')")
+    //@PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO', 'ADMINISTRADOR')")
+    @PreAuthorize("hasRole('TUTOR')")
     @PostMapping(value = "/incidentes/{incidenteId}/adjuntos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<AdjuntoResponseDto>> subirEvidencia(
             @PathVariable UUID incidenteId,
@@ -29,7 +30,8 @@ public interface IIncidenteAdjuntoContractApi {
             HttpServletRequest request);
 
     @Operation(summary = "Subir varias evidencias", description = "Una sola descripción aplica a todos los archivos del lote.")
-    @PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO', 'ADMINISTRADOR')")
+    //@PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO', 'ADMINISTRADOR')")
+    @PreAuthorize("hasRole('TUTOR')")
     @PostMapping(value = "/incidentes/{incidenteId}/adjuntos/lote", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<List<AdjuntoResponseDto>>> subirEvidencias(
             @PathVariable UUID incidenteId,
@@ -56,7 +58,8 @@ public interface IIncidenteAdjuntoContractApi {
             @PathVariable Long adjuntoId, HttpServletRequest request);
 
     @Operation(summary = "Eliminar evidencia (lógica)", description = "Exige el motivo de eliminación en el cuerpo.")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','TUTOR')")
     @DeleteMapping("/adjuntos/{adjuntoId}")
     ResponseEntity<ApiResponse<Void>> eliminarAdjunto(
             @PathVariable Long adjuntoId, @Valid @RequestBody EliminarAdjuntoRequestDto dto, HttpServletRequest request);

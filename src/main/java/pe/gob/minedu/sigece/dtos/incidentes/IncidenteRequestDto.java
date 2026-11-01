@@ -20,6 +20,6 @@ public record IncidenteRequestDto(
         MedioOcurrencia medioOcurrencia,          // null => PRESENCIAL
         @NotNull(message = "La fecha de ocurrencia es obligatoria")
         OffsetDateTime fechaOcurrencia,
-        Boolean notificarApoderado,               // null => false
-        Long responsableId                        // null => quien reporta
+        Boolean notificarApoderado               // null => false
+        //Long responsableId                        // null => quien reporta
 ) {}

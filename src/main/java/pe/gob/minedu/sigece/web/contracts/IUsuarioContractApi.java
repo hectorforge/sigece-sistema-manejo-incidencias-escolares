@@ -103,7 +103,8 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario recuperado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{usuarioId}")
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> obtenerPorId(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,
@@ -115,7 +116,8 @@ public interface IUsuarioContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario recuperado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/username/{username}")
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> obtenerPorUsername(
             @Parameter(description = "Username del usuario", example = "admin_colegio", required = true) @PathVariable String username,
@@ -137,7 +139,9 @@ public interface IUsuarioContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuarios filtrados por rol", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO', 'TUTOR')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/rol/{rol}")
     ResponseEntity<ApiResponse<List<UsuarioResumenResponseDto>>> listarPorRol(
             @Parameter(description = "Rol a filtrar", example = "ROLE_PSICOLOGO", required = true) @PathVariable RolNombre rol,
@@ -148,7 +152,8 @@ public interface IUsuarioContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Conteo obtenido", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{usuarioId}/casos-activos/conteo")
     ResponseEntity<ApiResponse<Integer>> contarCasosActivosAsignados(
             @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long usuarioId,

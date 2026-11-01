@@ -22,13 +22,15 @@ import java.util.UUID;
 public interface IIncidenteInvolucradoContractApi {
 
     @Operation(summary = "Agregar involucrado", description = "Debe enviar estudianteId o usuarioId, no ambos. Roles: TUTOR, PSICOLOGO.")
-    @PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO', 'ADMINISTRADOR')")
+    //@PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO', 'ADMINISTRADOR')")
+    @PreAuthorize("hasRole('TUTOR')")
     @PostMapping("/incidentes/{incidenteId}/involucrados")
     ResponseEntity<ApiResponse<InvolucradoResponseDto>> agregarInvolucrado(
             @PathVariable UUID incidenteId, @Valid @RequestBody InvolucradoRequestDto dto, HttpServletRequest request);
 
     @Operation(summary = "Remover involucrado", description = "Exige el motivo del retiro en el cuerpo.")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    @PreAuthorize("hasRole('TUTOR')")
     @DeleteMapping("/incidentes/{incidenteId}/involucrados/{involucradoId}")
     ResponseEntity<ApiResponse<Void>> removerInvolucrado(
             @PathVariable UUID incidenteId, @PathVariable Long involucradoId,

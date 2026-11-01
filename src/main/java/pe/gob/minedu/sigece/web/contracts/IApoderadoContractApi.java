@@ -54,7 +54,8 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Apoderado encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Apoderado no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/{apoderadoId}")
     ResponseEntity<ApiResponse<ApoderadoResponseDto>> obtenerPorId(
             @Parameter(description = "ID único del apoderado", example = "1", required = true) @PathVariable Long apoderadoId,
@@ -66,7 +67,8 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Apoderado encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Documento no registrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/documento/{numeroDocumento}")
     ResponseEntity<ApiResponse<ApoderadoResponseDto>> obtenerPorNumeroDocumento(
             @Parameter(description = "Número de documento", example = "72345678", required = true) @PathVariable String numeroDocumento,
@@ -77,7 +79,8 @@ public interface IApoderadoContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/estudiante/{estudianteId}")
     ResponseEntity<ApiResponse<List<ApoderadoResponseDto>>> listarPorEstudiante(
             @Parameter(description = "ID del estudiante", example = "10", required = true) @PathVariable Long estudianteId,
@@ -89,7 +92,8 @@ public interface IApoderadoContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Vínculos obtenidos", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Apoderado no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/{apoderadoId}/vinculos")
     ResponseEntity<ApiResponse<List<VinculoFamiliarResponseDto>>> listarVinculosPorApoderado(
             @Parameter(description = "ID del apoderado", example = "1", required = true) @PathVariable Long apoderadoId,
@@ -100,7 +104,8 @@ public interface IApoderadoContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Búsqueda paginada exitosa", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/buscar")
     ResponseEntity<ApiResponse<List<ApoderadoResponseDto>>> buscar(
             @ModelAttribute ApoderadoFiltroRequestDto filtro,

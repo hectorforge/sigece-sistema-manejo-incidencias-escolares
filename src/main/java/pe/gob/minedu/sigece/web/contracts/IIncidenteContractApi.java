@@ -19,7 +19,7 @@ import java.util.UUID;
 public interface IIncidenteContractApi {
 
     @Operation(summary = "Registrar incidente", description = "Abre el expediente. Roles: TUTOR, PSICOLOGO.")
-    @PreAuthorize("hasAnyRole('TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasRole('TUTOR')")
     @PostMapping
     ResponseEntity<ApiResponse<IncidenteResponseDto>> registrarIncidente(
             @Valid @RequestBody IncidenteRequestDto dto, HttpServletRequest request);
@@ -31,12 +31,14 @@ public interface IIncidenteContractApi {
             @PathVariable UUID incidenteId, HttpServletRequest request);
 
     @Operation(summary = "Búsqueda paginada y filtrada", description = "Filtros por término, estado, gravedad, tipo, fechas y reincidencia. El TUTOR ve solo sus aulas (RN04).")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/buscar")
     ResponseEntity<ApiResponse<List<IncidenteResumenResponseDto>>> buscar(
             @ModelAttribute IncidenteFiltroRequestDto filtro, HttpServletRequest request);
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping
     ResponseEntity<ApiResponse<List<IncidenteResumenResponseDto>>> listarTodos(
             HttpServletRequest request
@@ -49,10 +51,12 @@ public interface IIncidenteContractApi {
             @PathVariable UUID incidenteId, @Valid @RequestBody ClasificarGravedadRequestDto dto, HttpServletRequest request);
 
     @Operation(summary = "Asignar o reasignar responsable", description = "Roles: ADMINISTRADOR, PSICOLOGO.")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{incidenteId}/responsable")
     ResponseEntity<ApiResponse<IncidenteResponseDto>> asignarResponsable(
-            @PathVariable UUID incidenteId, @Valid @RequestBody AsignarResponsableRequestDto dto, HttpServletRequest request);
+            @PathVariable UUID incidenteId,
+            @Valid @RequestBody AsignarResponsableRequestDto dto,
+            HttpServletRequest request);
 
     @Operation(summary = "Cambiar estado", description = "No admite RESUELTO ni CERRADO: usar /resolucion y /cierre.")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")

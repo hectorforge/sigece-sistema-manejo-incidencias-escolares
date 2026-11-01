@@ -1,0 +1,16 @@
+I. Flujo de una incidencia cuando es reportada
+
+1. TUTOR           ---> Registra la incidencia (CU10), agrega involucrados (CU12) y evidencias (CU14).
+2. ADMINISTRADOR   ---> Revisa la nueva incidencia y le asigna el Psicólogo responsable (CU13).
+3. PSICÓLOGO       ---> Ve el caso asignado (CU16) y registra las citas, entrevistas y seguimiento (CU15).
+4. TUTOR           ---> Puede consultar el expediente (CU16) para ver las notas y el avance del caso.
+5. PSICÓLOGO       ---> Resuelve el caso cuando culmina la atención psicológica.
+6. ADMINISTRADOR   ---> Revisa checklist, cierra formalmente el caso con acta (CU19) y deriva a SíSeVe si corresponde (CU20).
+
+II. Flujo estado de una incidencia a lo largo del tiempo
+Estado	Actor Responsable	Qué caso de uso lo activa	Qué significa
+REGISTRADO	Tutor	CU10. Registrar incidencia	La incidencia fue reportada por el tutor. Aún no tiene psicólogo asignado (responsableId = null). Está en bandeja del Administrador.
+EN_INVESTIGACION	Administrador	CU13. Asignar responsable	El Administrador revisa el caso, clasifica la gravedad formal y le asigna el psicólogo. Pasa a investigación para contrastar versiones con los involucrados.
+EN_SEGUIMIENTO	Psicólogo	CU15. Registrar acción de seguimiento	Se activa automáticamente cuando el Psicólogo registra su primera acción clínica (cita a padres, entrevista a estudiantes o compromiso).
+RESUELTO	Psicólogo	Endpoint /resolucion	El Psicólogo cumplió los compromisos y concluyó su intervención formativa/terapéutica. El caso ya no requiere más citas.
+CERRADO	Administrador	CU19. Cerrar caso de incidente	El Administrador valida que todo esté en regla (checklist previo), sube el Acta de Cierre y despacha la notificación final (CU17).

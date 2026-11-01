@@ -24,7 +24,8 @@ public interface IDashboardContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Indicadores calculados exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Filtros inválidos", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/indicadores")
     ResponseEntity<ApiResponse<DashboardResponseDto>> obtenerIndicadores(
             @ModelAttribute DashboardFiltroRequestDto filtro,

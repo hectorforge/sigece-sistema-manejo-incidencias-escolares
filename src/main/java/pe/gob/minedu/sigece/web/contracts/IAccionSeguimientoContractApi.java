@@ -58,7 +58,8 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    @PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
+    //@PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @PostMapping("/incidente/{incidenteId}")
     ResponseEntity<ApiResponse<AccionSeguimientoResponseDto>> registrarAccion(
             @Parameter(description = "Identificador UUID de la incidencia", required = true)
@@ -83,7 +84,8 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    @PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
+    //@PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @PatchMapping("/{accionId}/estado")
     ResponseEntity<ApiResponse<AccionSeguimientoResponseDto>> actualizarEstadoAccion(
             @Parameter(description = "Identificador de la acción de seguimiento", example = "1", required = true)
@@ -108,7 +110,8 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    @PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
+    //@PreAuthorize("hasAnyRole('PSICOLOGO', 'ADMINISTRADOR')")
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @PatchMapping("/{accionId}/revision")
     ResponseEntity<ApiResponse<AccionSeguimientoResponseDto>> reprogramarProximaRevision(
             @Parameter(description = "Identificador de la acción de seguimiento", example = "1", required = true)
@@ -171,7 +174,8 @@ public interface IAccionSeguimientoContractApi {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PSICOLOGO')")
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @GetMapping("/usuario/{usuarioId}/pendientes")
     ResponseEntity<ApiResponse<List<AccionSeguimientoResponseDto>>> listarPendientesPorUsuario(
             @Parameter(description = "Identificador del usuario", example = "1", required = true)

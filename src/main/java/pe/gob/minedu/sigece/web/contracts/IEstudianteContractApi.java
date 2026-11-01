@@ -56,7 +56,8 @@ public interface IEstudianteContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Estudiante encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Estudiante no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/{estudianteId}")
     ResponseEntity<ApiResponse<EstudianteResponseDto>> obtenerPorId(
             @Parameter(description = "ID del estudiante", example = "10", required = true) @PathVariable Long estudianteId,
@@ -68,7 +69,8 @@ public interface IEstudianteContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Estudiante encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Código SIAGIE no registrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/siagie/{codigoSiagie}")
     ResponseEntity<ApiResponse<EstudianteResponseDto>> obtenerPorCodigoSiagie(
             @Parameter(description = "Código oficial SIAGIE", example = "1234567890", required = true) @PathVariable String codigoSiagie,
@@ -80,7 +82,8 @@ public interface IEstudianteContractApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Perfil recuperado", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Estudiante no encontrado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/{estudianteId}/perfil")
     ResponseEntity<ApiResponse<EstudiantePerfilResponseDto>> obtenerPerfil(
             @Parameter(description = "ID del estudiante", example = "10", required = true) @PathVariable Long estudianteId,
@@ -91,7 +94,8 @@ public interface IEstudianteContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Estudiantes listados exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/buscar")
     ResponseEntity<ApiResponse<List<EstudianteResponseDto>>> buscar(
             @ModelAttribute EstudianteFiltroRequestDto filtro,
@@ -151,7 +155,8 @@ public interface IEstudianteContractApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Conteo obtenido", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
     @GetMapping("/{estudianteId}/incidentes/conteo")
     ResponseEntity<ApiResponse<Integer>> contarIncidentesAsociados(
             @Parameter(description = "ID del estudiante", example = "10", required = true) @PathVariable Long estudianteId,
