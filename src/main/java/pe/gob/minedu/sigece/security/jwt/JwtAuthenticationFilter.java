@@ -5,8 +5,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,17 +16,27 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import pe.gob.minedu.sigece.security.UserDetailsServiceImpl;
 
 import java.io.IOException;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceImpl userDetailsService;
+    private final HandlerExceptionResolver resolver;
+
+    public JwtAuthenticationFilter(
+            JwtUtils jwtUtils,
+            UserDetailsServiceImpl userDetailsService,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        this.jwtUtils = jwtUtils;
+        this.userDetailsService = userDetailsService;
+        this.resolver = resolver;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -40,23 +52,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                if (userDetails.isEnabled() && userDetails.isAccountNonLocked()) {
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
-
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                // Validar si la cuenta está desactivada
+                if (!userDetails.isEnabled()) {
+                    throw new DisabledException("La cuenta del usuario está desactivada.");
                 }
+
+                // Validar si la cuenta está bloqueada temporalmente
+                if (!userDetails.isAccountNonLocked()) {
+                    throw new LockedException("La cuenta del usuario se encuentra bloqueada.");
+                }
+
+                // Si todo está correcto, registrar la autenticación
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+
+            filterChain.doFilter(request, response);
+
+        } catch (DisabledException | LockedException e) {
+            log.warn("Error en estado de cuenta durante la autenticación: {}", e.getMessage());
+            // Delega la excepción al GlobalExceptionHandler para que responda con la estructura ApiResponse uniforme
+            resolver.resolveException(request, response, null, e);
         } catch (Exception e) {
             log.error("No se pudo configurar la autenticación del usuario en el contexto de seguridad", e);
+            filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
     }
 
     private String extraerJwt(HttpServletRequest request) {

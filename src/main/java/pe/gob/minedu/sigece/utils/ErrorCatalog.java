@@ -103,6 +103,13 @@ public enum ErrorCatalog {
             HttpStatus.UNAUTHORIZED
     ),
 
+    ACCOUNT_LOCKED(
+            "ERR_AUTH_007",
+            "La cuenta de usuario se encuentra bloqueada temporalmente",
+            "Espere a que expire el tiempo de bloqueo o comuníquese con el administrador del sistema.",
+            HttpStatus.FORBIDDEN
+    ),
+
     /**
      * Usuarios y roles
      */

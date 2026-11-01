@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +16,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import pe.gob.minedu.sigece.dtos.common.ApiResponse;
 import pe.gob.minedu.sigece.utils.ErrorCatalog;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -20,6 +24,60 @@ import java.util.UUID;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * Captura cuando el usuario no cuenta con los roles/permisos necesarios (@PreAuthorize / roles)
+     */
+    @ExceptionHandler({AuthorizationDeniedException.class, AccessDeniedException.class})
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(Exception ex, HttpServletRequest request) {
+        String traceId = getTraceId(request);
+        log.warn("[{}] Acceso denegado: {}", traceId, ex.getMessage());
+
+        return ResponseEntity.status(ErrorCatalog.ACCESS_DENIED.getStatus())
+                .body(ApiResponse.error(
+                        ErrorCatalog.ACCESS_DENIED.getStatus(),
+                        ErrorCatalog.ACCESS_DENIED,
+                        ErrorCatalog.ACCESS_DENIED.getMessage(),
+                        request.getRequestURI(),
+                        traceId
+                ));
+    }
+
+    /**
+     * Captura cuando el usuario tiene activo = false en la BD (isEnabled() == false)
+     */
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccountDisabled(DisabledException ex, HttpServletRequest request) {
+        String traceId = getTraceId(request);
+        log.warn("[{}] Intento de acceso con cuenta deshabilitada: {}", traceId, ex.getMessage());
+
+        return ResponseEntity.status(ErrorCatalog.ACCOUNT_DISABLED.getStatus())
+                .body(ApiResponse.error(
+                        ErrorCatalog.ACCOUNT_DISABLED.getStatus(),
+                        ErrorCatalog.ACCOUNT_DISABLED,
+                        ErrorCatalog.ACCOUNT_DISABLED.getMessage(),
+                        request.getRequestURI(),
+                        traceId
+                ));
+    }
+
+    /**
+     * (Opcional recomendado) Captura cuando la cuenta está bloqueada temporalmente (isAccountNonLocked() == false)
+     */
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccountLocked(LockedException ex, HttpServletRequest request) {
+        String traceId = getTraceId(request);
+        log.warn("[{}] Intento de acceso con cuenta bloqueada: {}", traceId, ex.getMessage());
+
+        return ResponseEntity.status(ErrorCatalog.ACCOUNT_LOCKED.getStatus())
+                .body(ApiResponse.error(
+                        ErrorCatalog.ACCOUNT_LOCKED.getStatus(),
+                        ErrorCatalog.ACCOUNT_LOCKED,
+                        ErrorCatalog.ACCOUNT_LOCKED.getMessage(),
+                        request.getRequestURI(),
+                        traceId
+                ));
+    }
 
     @ExceptionHandler({RecursoNoEncontradoException.class, ApoderadoNoEncontradoException.class})
     public ResponseEntity<ApiResponse<Void>> handleNotFound(RuntimeException ex, HttpServletRequest request) {
