@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pe.gob.minedu.sigece.dtos.auth.AuthResponseDto;
+import pe.gob.minedu.sigece.dtos.auth.CambioPasswordRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.LoginRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.RefreshTokenRequestDto;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioMantenimientoResponseDto;
@@ -66,6 +67,19 @@ public class AuthController implements IAuthContractApi {
         return ResponseEntity.ok(ApiResponse.success(
                 data,
                 "Datos de sesión actual obtenidos exitosamente",
+                HttpStatus.OK,
+                request.getRequestURI(),
+                getTraceId(request)
+        ));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Void>> cambiarPassword(CambioPasswordRequestDto dto, HttpServletRequest request) {
+        Long usuarioId = usuarioActualProvider.getUsuarioActualId();
+        authService.cambiarPassword(usuarioId, dto);
+        return ResponseEntity.ok(ApiResponse.success(
+                null,
+                "Contraseña actualizada exitosamente",
                 HttpStatus.OK,
                 request.getRequestURI(),
                 getTraceId(request)

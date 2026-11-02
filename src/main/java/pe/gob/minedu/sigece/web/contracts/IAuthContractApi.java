@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pe.gob.minedu.sigece.dtos.auth.AuthResponseDto;
+import pe.gob.minedu.sigece.dtos.auth.CambioPasswordRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.LoginRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.RefreshTokenRequestDto;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioMantenimientoResponseDto;
@@ -68,6 +69,19 @@ public interface IAuthContractApi {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     ResponseEntity<ApiResponse<UsuarioMantenimientoResponseDto>> me(
+            HttpServletRequest request
+    );
+
+    @Operation(summary = "Cambiar contraseña", description = "Permite al usuario autenticado modificar su contraseña actual.", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Contraseña cambiada exitosamente", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos o la contraseña no cumple los requisitos", content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Contraseña actual incorrecta o token no autenticado", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+    })
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/cambiar-password")
+    ResponseEntity<ApiResponse<Void>> cambiarPassword(
+            @Valid @RequestBody CambioPasswordRequestDto dto,
             HttpServletRequest request
     );
 }

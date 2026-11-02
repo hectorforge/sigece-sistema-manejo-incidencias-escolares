@@ -1,9 +1,6 @@
 package pe.gob.minedu.sigece.usecases;
 
-import pe.gob.minedu.sigece.dtos.auth.AuthResponseDto;
-import pe.gob.minedu.sigece.dtos.auth.LoginRequestDto;
-import pe.gob.minedu.sigece.dtos.auth.RefreshTokenRequestDto;
-import pe.gob.minedu.sigece.dtos.auth.UsuarioResponseDto;
+import pe.gob.minedu.sigece.dtos.auth.*;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioMantenimientoResponseDto;
 
 /**
@@ -50,4 +47,6 @@ public interface IAuthService {
      * @return Datos del perfil del usuario autenticado.
      */
     UsuarioMantenimientoResponseDto obtenerSesionActual(Long usuarioId);
+
+    void cambiarPassword(Long usuarioId, CambioPasswordRequestDto dto);
 }

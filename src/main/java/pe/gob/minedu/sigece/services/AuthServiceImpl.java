@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.gob.minedu.sigece.dtos.auth.AuthResponseDto;
+import pe.gob.minedu.sigece.dtos.auth.CambioPasswordRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.LoginRequestDto;
 import pe.gob.minedu.sigece.dtos.auth.RefreshTokenRequestDto;
 import pe.gob.minedu.sigece.dtos.usuarios.UsuarioMantenimientoResponseDto;
@@ -122,5 +123,46 @@ public class AuthServiceImpl implements IAuthService {
         return usuarioRepository.findById(usuarioId)
                 .map(UsuarioMapper::toDto)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
+    public void cambiarPassword(Long usuarioId, CambioPasswordRequestDto dto) {
+        log.info("Iniciando cambio de contraseña para el usuario ID: {}", usuarioId);
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .filter(u -> Boolean.TRUE.equals(u.getActivo()))
+                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.USUARIO_NOT_FOUND));
+
+        // 1. Validar que la nueva contraseña y su confirmación sean exactamente iguales
+        if (!dto.nuevoPassword().equals(dto.confirmacionPassword())) {
+            throw new OperacionInvalidaException(
+                    ErrorCatalog.BAD_REQUEST,
+                    "La nueva contraseña y su confirmación no coinciden"
+            );
+        }
+
+        // 2. Validar que la contraseña actual coincida
+        if (!passwordEncoder.matches(dto.passwordActual(), usuario.getPasswordHash())) {
+            throw new OperacionInvalidaException(
+                    ErrorCatalog.INVALID_CREDENTIALS,
+                    "La contraseña actual proporcionada es incorrecta"
+            );
+        }
+
+        // 3. Validar que la nueva contraseña no sea idéntica a la anterior
+        if (passwordEncoder.matches(dto.nuevoPassword(), usuario.getPasswordHash())) {
+            throw new OperacionInvalidaException(
+                    ErrorCatalog.BAD_REQUEST,
+                    "La nueva contraseña no puede ser idéntica a la anterior"
+            );
+        }
+
+        // 4. Encriptar y persistir
+        usuario.setPasswordHash(passwordEncoder.encode(dto.nuevoPassword()));
+        usuario.setDebeCambiarPassword(false);
+        usuarioRepository.save(usuario);
+
+        log.info("Contraseña actualizada exitosamente para el usuario: {}", usuario.getUsername());
     }
 }
