@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pe.gob.minedu.sigece.dtos.adjuntos.*;
+import pe.gob.minedu.sigece.dtos.storage.StorageResult;
 import pe.gob.minedu.sigece.exceptions.OperacionInvalidaException;
 import pe.gob.minedu.sigece.exceptions.RecursoDuplicadoException;
 import pe.gob.minedu.sigece.exceptions.RecursoNoEncontradoException;
@@ -48,7 +49,7 @@ public class IncidenteAdjuntoServiceImpl implements IIncidenteAdjuntoService {
         if (archivo == null || archivo.isEmpty()) {
             throw new OperacionInvalidaException(ErrorCatalog.BAD_REQUEST, "El archivo enviado está vacío");
         }
-        if (archivo.getSize() > 10485760) {
+        if (archivo.getSize() > 15728640) { // 15 MB
             throw new OperacionInvalidaException(ErrorCatalog.ADJUNTO_TAMANO_EXCEDIDO);
         }
 
@@ -68,19 +69,19 @@ public class IncidenteAdjuntoServiceImpl implements IIncidenteAdjuntoService {
             throw new RecursoDuplicadoException(ErrorCatalog.BAD_REQUEST, "Esta evidencia ya fue adjuntada al expediente");
         }
 
-        String nombreAlmacenamiento = UUID.randomUUID() + "_" + archivo.getOriginalFilename();
-        String urlStorage = storageProvider.subirArchivo(nombreAlmacenamiento, archivo);
+        // Subida a Cloudinary enviando el ID del incidente para organizar la ruta y nombre
+        StorageResult resultadoStorage = storageProvider.subirArchivo(incidenteId.toString(), archivo);
 
         IncidenteAdjunto adjunto = new IncidenteAdjunto();
         adjunto.setIncidente(incidente);
         adjunto.setAccion(accion);
         adjunto.setSubidoPor(usuario);
         adjunto.setNombreOriginal(archivo.getOriginalFilename());
-        adjunto.setNombreAlmacenamiento(nombreAlmacenamiento);
+        adjunto.setNombreAlmacenamiento(resultadoStorage.publicId());
         adjunto.setDescripcion(dto.descripcion().trim());
         adjunto.setTipoMime(archivo.getContentType() != null ? archivo.getContentType() : "application/octet-stream");
         adjunto.setTamanoBytes(archivo.getSize());
-        adjunto.setUrlStorage(urlStorage);
+        adjunto.setUrlStorage(resultadoStorage.url());
         adjunto.setHashSha256(hashCalculado);
         adjunto.setActivo(true);
 
@@ -152,6 +153,17 @@ public class IncidenteAdjuntoServiceImpl implements IIncidenteAdjuntoService {
                 .filter(IncidenteAdjunto::getActivo)
                 .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.ADJUNTO_NOT_FOUND));
 
+        // Eliminar físicamente el archivo de Cloudinary
+        try {
+            storageProvider.eliminarArchivo(adjunto.getNombreAlmacenamiento());
+        } catch (Exception e) {
+            log.error("No se pudo eliminar el archivo físico en Cloudinary: {}. Error: {}",
+                    adjunto.getNombreAlmacenamiento(), e.getMessage());
+            // Si la eliminacion falla
+            throw new OperacionInvalidaException(ErrorCatalog.ADJUNTO_ALMACENAMIENTO_ERROR, "Error al eliminar en almacenamiento");
+        }
+
+        // Baja lógica y registro de auditoría en Base de Datos
         adjunto.setActivo(false);
         adjunto.setFechaEliminacion(OffsetDateTime.now());
         adjunto.setEliminadoPor(usuario);

@@ -31,8 +31,7 @@ public interface IIncidenteContractApi {
             @PathVariable UUID incidenteId, HttpServletRequest request);
 
     @Operation(summary = "Búsqueda paginada y filtrada", description = "Filtros por término, estado, gravedad, tipo, fechas y reincidencia. El TUTOR ve solo sus aulas (RN04).")
-    //@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'TUTOR', 'PSICOLOGO')")
     @GetMapping("/buscar")
     ResponseEntity<ApiResponse<List<IncidenteResumenResponseDto>>> buscar(
             @ModelAttribute IncidenteFiltroRequestDto filtro, HttpServletRequest request);

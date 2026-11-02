@@ -65,12 +65,12 @@ public class IncidenteServiceImpl implements IIncidenteService {
             throw new OperacionInvalidaException(ErrorCatalog.TIPO_INCIDENCIA_INACTIVO);
         }
 
-        // responsable_actual_id es NOT NULL: por defecto, quien reporta o el indicado
-        Usuario responsable = (dto.responsableId() == null || dto.responsableId().equals(reportador.getId()))
-                ? reportador
-                : usuarioRepository.findById(dto.responsableId())
-                .filter(Usuario::getActivo)
-                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_RESPONSABLE_NOT_FOUND));
+//        // responsable_actual_id es NOT NULL: por defecto, quien reporta o el indicado
+//        Usuario responsable = (dto.responsableId() == null || dto.responsableId().equals(reportador.getId()))
+//                ? reportador
+//                : usuarioRepository.findById(dto.responsableId())
+//                .filter(Usuario::getActivo)
+//                .orElseThrow(() -> new RecursoNoEncontradoException(ErrorCatalog.INCIDENTE_RESPONSABLE_NOT_FOUND));
 
         Incidente i = new Incidente();
         i.setCodigoCaso(generarCodigoCaso());
@@ -82,7 +82,7 @@ public class IncidenteServiceImpl implements IIncidenteService {
         i.setFechaOcurrencia(dto.fechaOcurrencia());
         i.setEstado(EstadoIncidente.REGISTRADO);
         i.setReportadoPor(reportador);
-        i.setResponsableActual(responsable);
+        i.setResponsableActual(null);
         i.setNotificarApoderado(Boolean.TRUE.equals(dto.notificarApoderado()));
 
         log.info("Incidente {} registrado por usuario ID: {}", i.getCodigoCaso(), usuarioReportaId);

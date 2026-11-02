@@ -8,6 +8,11 @@ spring:
     password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
 
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -30,6 +35,12 @@ sigece:
     allowed-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
     allowed-headers: "Authorization,Content-Type,X-Requested-With,Accept"
     max-age-secs: 3600
+
+# Credenciales y Configuración de Cloudinary
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:tu_cloud_name}
+  api-key: ${CLOUDINARY_API_KEY:tu_api_key}
+  api-secret: ${CLOUDINARY_API_SECRET:tu_api_secret}
 
 # Configuracion de los logs
 logging:
