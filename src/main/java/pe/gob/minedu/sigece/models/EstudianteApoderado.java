@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import pe.gob.minedu.sigece.enums.Parentesco;
 
 import java.time.OffsetDateTime;
@@ -16,6 +17,7 @@ import java.time.OffsetDateTime;
         uniqueConstraints = @UniqueConstraint(
                 name = "uq_estudiante_apoderado",
                 columnNames = {"estudiante_id", "apoderado_id"}))
+@SQLRestriction("esta_eliminado = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,6 +48,9 @@ public class EstudianteApoderado {
     @NotNull
     @Column(name = "es_contacto_principal", nullable = false)
     private Boolean esContactoPrincipal = false;
+
+    @Column(name = "esta_eliminado", nullable = false)
+    private Boolean estaEliminado = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

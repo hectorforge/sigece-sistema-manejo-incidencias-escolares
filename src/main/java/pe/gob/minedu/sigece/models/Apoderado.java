@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 import pe.gob.minedu.sigece.enums.TipoDocumento;
 
@@ -14,6 +15,7 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "apoderados")
+@SQLRestriction("esta_eliminado = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -53,6 +55,9 @@ public class Apoderado {
     @Size(max = 150)
     @Column(name = "correo", length = 150)
     private String correo;
+
+    @Column(name = "esta_eliminado", nullable = false)
+    private Boolean estaEliminado = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

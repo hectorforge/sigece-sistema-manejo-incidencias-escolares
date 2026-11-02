@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 import pe.gob.minedu.sigece.enums.Nivel;
 
@@ -20,6 +21,7 @@ import java.time.OffsetDateTime;
  */
 @Entity
 @Table(name = "estudiantes")
+@SQLRestriction("esta_eliminado = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -68,6 +70,9 @@ public class Estudiante {
     @NotNull
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
+
+    @Column(name = "esta_eliminado", nullable = false)
+    private Boolean estaEliminado = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

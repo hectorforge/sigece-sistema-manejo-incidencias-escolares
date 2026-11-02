@@ -94,4 +94,6 @@ public interface IApoderadoService {
      * @return Página de apoderados encontrados.
      */
     PagedResponse<ApoderadoResponseDto> buscar(ApoderadoFiltroRequestDto filtro);
+
+    void eliminar(Long apoderadoId);
 }

@@ -7,12 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "usuarios")
+@SQLRestriction("esta_eliminado = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -67,6 +69,9 @@ public class Usuario {
     @NotNull
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
+
+    @Column(name = "esta_eliminado", nullable = false)
+    private Boolean estaEliminado = false;
 
     @Column(name = "ultimo_acceso")
     private OffsetDateTime ultimoAcceso;

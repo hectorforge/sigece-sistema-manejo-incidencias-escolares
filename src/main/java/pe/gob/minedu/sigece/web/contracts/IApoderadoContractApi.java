@@ -124,4 +124,30 @@ public interface IApoderadoContractApi {
             @Parameter(description = "ID del apoderado", example = "1", required = true) @PathVariable Long apoderadoId,
             HttpServletRequest request
     );
+
+    @Operation(
+            summary = "Eliminar apoderado",
+            description = "Realiza la eliminación lógica de un apoderado. El registro permanece en la base de datos, pero deja de aparecer en las consultas normales."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "204",
+                    description = "Apoderado eliminado exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Apoderado no encontrado o previamente eliminado",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @DeleteMapping("/{apoderadoId}")
+    ResponseEntity<Void> eliminar(
+            @Parameter(
+                    description = "ID único del apoderado que se desea eliminar",
+                    example = "1",
+                    required = true
+            )
+            @PathVariable Long apoderadoId
+    );
 }

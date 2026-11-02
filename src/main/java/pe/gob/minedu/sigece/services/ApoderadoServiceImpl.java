@@ -152,4 +152,22 @@ public class ApoderadoServiceImpl implements IApoderadoService {
 
         return new PagedResponse<>(content, meta);
     }
+
+    @Override
+    @Transactional
+    public void eliminar(Long apoderadoId) {
+        log.info("Eliminando lógicamente al apoderado ID: {}", apoderadoId);
+
+        var apoderado = apoderadoRepository.findById(apoderadoId)
+                .filter(a -> !Boolean.TRUE.equals(a.getEstaEliminado()))
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        ErrorCatalog.APODERADO_NOT_FOUND
+                ));
+
+        apoderado.setEstaEliminado(true);
+
+        apoderadoRepository.save(apoderado);
+
+        log.info("Apoderado ID: {} eliminado lógicamente correctamente", apoderadoId);
+    }
 }

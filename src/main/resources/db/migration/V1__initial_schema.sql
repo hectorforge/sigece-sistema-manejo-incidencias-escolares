@@ -42,6 +42,7 @@ CREATE TABLE usuarios (
     telefono                    VARCHAR(20),
     role_id                     BIGINT       NOT NULL,
     activo                      BOOLEAN      NOT NULL DEFAULT TRUE,
+    esta_eliminado BOOLEAN NOT NULL DEFAULT FALSE,
     ultimo_acceso               TIMESTAMP WITH TIME ZONE,
     intentos_fallidos           INTEGER      NOT NULL DEFAULT 0,
     bloqueado_hasta             TIMESTAMP WITH TIME ZONE,
@@ -103,6 +104,7 @@ CREATE TABLE estudiantes (
     grado               VARCHAR(20)  NOT NULL,
     seccion             VARCHAR(10)  NOT NULL,
     activo              BOOLEAN      NOT NULL DEFAULT TRUE,
+    esta_eliminado BOOLEAN NOT NULL DEFAULT FALSE,
     created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp(),
     updated_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp(),
 
@@ -129,6 +131,7 @@ CREATE TABLE apoderados (
     numero_documento    VARCHAR(15)  NOT NULL UNIQUE,
     telefono            VARCHAR(20)  NOT NULL,
     correo              VARCHAR(150),
+    esta_eliminado BOOLEAN NOT NULL DEFAULT FALSE,
     created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp(),
     updated_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp(),
 
@@ -151,6 +154,7 @@ CREATE TABLE estudiante_apoderado (
     apoderado_id            BIGINT NOT NULL,
     parentesco              VARCHAR(30) NOT NULL,
     es_contacto_principal   BOOLEAN NOT NULL DEFAULT FALSE,
+    esta_eliminado BOOLEAN NOT NULL DEFAULT FALSE,
     created_at              TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp(),
 
     CONSTRAINT fk_est_apod_estudiante FOREIGN KEY (estudiante_id) REFERENCES estudiantes(id) ON DELETE CASCADE,

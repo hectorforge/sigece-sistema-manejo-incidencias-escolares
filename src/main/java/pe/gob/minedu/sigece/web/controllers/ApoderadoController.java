@@ -72,6 +72,12 @@ public class ApoderadoController implements IApoderadoContractApi {
         return ResponseEntity.ok(ApiResponse.success(null, "Apoderado asignado como contacto principal exitosamente", HttpStatus.OK, request.getRequestURI(), getTraceId(request)));
     }
 
+    @Override
+    public ResponseEntity<Void> eliminar(Long apoderadoId) {
+        apoderadoService.eliminar(apoderadoId);
+        return ResponseEntity.noContent().build();
+    }
+
     private String getTraceId(HttpServletRequest request) {
         String traceId = (String) request.getAttribute("traceId");
         return traceId != null ? traceId : UUID.randomUUID().toString();
