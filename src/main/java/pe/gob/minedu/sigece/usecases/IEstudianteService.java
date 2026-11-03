@@ -123,4 +123,6 @@ public interface IEstudianteService {
      * @return Conteo total de incidentes en los que figura involucrado.
      */
     int contarIncidentesAsociados(Long estudianteId);
+
+    void eliminar(Long estudianteId);
 }

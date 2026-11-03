@@ -214,4 +214,21 @@ public class EstudianteServiceImpl implements IEstudianteService {
     public int contarIncidentesAsociados(Long estudianteId) {
         return estudianteRepository.countIncidentesByEstudianteId(estudianteId);
     }
+
+    @Override
+    public void eliminar(Long estudianteId) {
+        log.info("Eliminando lógicamente al estudiante ID: {}", estudianteId);
+
+        var estudiante = estudianteRepository.findById(estudianteId)
+                .filter(a -> !Boolean.TRUE.equals(a.getEstaEliminado()))
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        ErrorCatalog.APODERADO_NOT_FOUND
+                ));
+
+        estudiante.setEstaEliminado(true);
+
+        estudianteRepository.save(estudiante);
+
+        log.info("Estudiante ID: {} eliminado lógicamente correctamente", estudianteId);
+    }
 }

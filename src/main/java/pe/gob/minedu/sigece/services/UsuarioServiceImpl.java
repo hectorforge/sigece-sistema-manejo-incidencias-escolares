@@ -217,4 +217,21 @@ public class UsuarioServiceImpl implements IUsuarioService {
                 .map(UsuarioMapper::toRolDto)
                 .toList();
     }
+
+    @Override
+    public void eliminar(Long usuarioId) {
+        log.info("Eliminando lógicamente al usuario ID: {}", usuarioId);
+
+        var usuario = usuarioRepository.findById(usuarioId)
+                .filter(a -> !Boolean.TRUE.equals(a.getEstaEliminado()))
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        ErrorCatalog.APODERADO_NOT_FOUND
+                ));
+
+        usuario.setEstaEliminado(true);
+
+        usuarioRepository.save(usuario);
+
+        log.info("Usuario ID: {} eliminado lógicamente correctamente", usuarioId);
+    }
 }

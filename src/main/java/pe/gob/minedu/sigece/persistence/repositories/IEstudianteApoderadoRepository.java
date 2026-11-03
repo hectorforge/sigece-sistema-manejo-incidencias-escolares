@@ -30,4 +30,9 @@ public interface IEstudianteApoderadoRepository extends JpaRepository<Estudiante
     @Modifying
     @Query("UPDATE EstudianteApoderado ea SET ea.esContactoPrincipal = true WHERE ea.estudiante.id = :estudianteId AND ea.apoderado.id = :apoderadoId")
     int marcarComoContactoPrincipal(@Param("estudianteId") Long estudianteId, @Param("apoderadoId") Long apoderadoId);
+
+    Optional<EstudianteApoderado> findByEstudianteIdAndApoderadoIdAndEstaEliminadoFalse(
+            Long estudianteId,
+            Long apoderadoId
+    );
 }

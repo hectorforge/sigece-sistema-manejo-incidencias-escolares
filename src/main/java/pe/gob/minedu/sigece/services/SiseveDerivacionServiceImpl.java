@@ -162,4 +162,23 @@ public class SiseveDerivacionServiceImpl implements ISiseveDerivacionService {
                 ))
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SiseveDerivacionResponseDto> listarDerivados() {
+        return incidenteRepository
+                .findDerivadosSiseve().stream()
+                .map(i -> new SiseveDerivacionResponseDto(
+                        i.getId(),
+                        i.getCodigoCaso(),
+                        i.getReportadoSiseve(),
+                        i.getCodigoSiseve(),
+                        i.getFechaReporteSiseve(),
+                        i.getObservacionesSiseve(),
+                        i.getDerivadoPor() != null
+                                ? i.getDerivadoPor().getNombres() + " " + i.getDerivadoPor().getApellidos()
+                                : null
+                ))
+                .toList();
+    }
 }

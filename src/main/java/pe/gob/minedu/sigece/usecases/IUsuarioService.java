@@ -134,4 +134,6 @@ public interface IUsuarioService {
      * @return Lista de roles del catálogo del sistema.
      */
     List<RolResponseDto> listarRoles();
+
+    void eliminar(Long usuarioId);
 }

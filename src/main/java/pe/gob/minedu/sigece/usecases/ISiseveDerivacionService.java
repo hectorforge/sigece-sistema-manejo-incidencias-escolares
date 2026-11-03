@@ -64,4 +64,6 @@ public interface ISiseveDerivacionService {
      * @return Lista de casos pendientes de derivación mandatoria.
      */
     List<SisevePendienteResponseDto> listarPendientesDeDerivacionObligatoria();
+
+    List<SiseveDerivacionResponseDto> listarDerivados();
 }

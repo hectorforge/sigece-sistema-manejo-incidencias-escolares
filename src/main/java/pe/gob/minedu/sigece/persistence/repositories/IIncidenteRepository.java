@@ -55,6 +55,16 @@ public interface IIncidenteRepository extends JpaRepository<Incidente, UUID>, Jp
             """)
     List<Incidente> findPendientesDeDerivacionSiseve();
 
+    // ==========================================
+    // MÉTODO AÑADIDO: Obtiene los casos derivados
+    // ==========================================
+    @Query("""
+            SELECT i FROM Incidente i
+            WHERE i.reportadoSiseve = true
+            ORDER BY i.fechaReporteSiseve DESC NULLS LAST
+            """)
+    List<Incidente> findDerivadosSiseve();
+
     long countByEstado(EstadoIncidente estado);
     long countByReportadoSiseveTrue();
 }

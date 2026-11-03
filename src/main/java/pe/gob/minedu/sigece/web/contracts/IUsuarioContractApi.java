@@ -169,4 +169,30 @@ public interface IUsuarioContractApi {
     ResponseEntity<ApiResponse<List<RolResponseDto>>> listarRoles(
             HttpServletRequest request
     );
+
+    @Operation(
+            summary = "Eliminar usuario",
+            description = "Realiza la eliminación lógica de un usuario institucional. El registro permanece en la base de datos, pero deja de aparecer en las consultas normales."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "204",
+                    description = "Usuario eliminado exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Usuario no encontrado o previamente eliminado",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @DeleteMapping("/{usuarioId}")
+    ResponseEntity<Void> eliminar(
+            @Parameter(
+                    description = "ID único del usuario que se desea eliminar",
+                    example = "1",
+                    required = true
+            )
+            @PathVariable Long usuarioId
+    );
 }

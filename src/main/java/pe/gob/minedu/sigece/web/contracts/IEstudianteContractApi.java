@@ -162,4 +162,30 @@ public interface IEstudianteContractApi {
             @Parameter(description = "ID del estudiante", example = "10", required = true) @PathVariable Long estudianteId,
             HttpServletRequest request
     );
+
+    @Operation(
+            summary = "Eliminar estudiante",
+            description = "Realiza la eliminación lógica de un estudiante. El registro permanece en la base de datos, pero deja de aparecer en las consultas normales."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "204",
+                    description = "Estudiante eliminado exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Estudiante no encontrado o previamente eliminado",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @DeleteMapping("/{estudianteId}")
+    ResponseEntity<Void> eliminar(
+            @Parameter(
+                    description = "ID único del estudiante que se desea eliminar",
+                    example = "10",
+                    required = true
+            )
+            @PathVariable Long estudianteId
+    );
 }

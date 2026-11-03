@@ -112,6 +112,12 @@ public class UsuarioController implements IUsuarioContractApi {
         return ResponseEntity.ok(ApiResponse.success(data, "Catálogo de roles recuperado exitosamente", HttpStatus.OK, request.getRequestURI(), getTraceId(request)));
     }
 
+    @Override
+    public ResponseEntity<Void> eliminar(Long usuarioId) {
+        usuarioService.eliminar(usuarioId);
+        return ResponseEntity.noContent().build();
+    }
+
     private String getTraceId(HttpServletRequest request) {
         String traceId = (String) request.getAttribute("traceId");
         return traceId != null ? traceId : UUID.randomUUID().toString();
